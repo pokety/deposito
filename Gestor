@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd /home/claudio/Documentos/depositoMaster
+npm start

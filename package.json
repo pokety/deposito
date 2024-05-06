@@ -1,0 +1,26 @@
+{
+  "dependencies": {
+    "as-table": "^1.0.55",
+    "colors": "^1.4.0",
+    "dotenv": "^16.3.1",
+    "inquirer": "^9.2.12",
+    "lodash": "^4.17.21",
+    "moment": "^2.30.1",
+    "mongodb": "^6.3.0",
+    "open": "^10.1.0",
+    "pdfkit": "^0.14.0",
+    "pdfkit-table": "^0.1.99",
+    "store": "^2.0.12"
+  },
+  "name": "deposito",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "conf":"./conf.sh"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
