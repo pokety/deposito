@@ -418,13 +418,6 @@ const menu=async()=>{
                 }
             ])
             
-            // const evento=await prompt([
-            //     {
-            //         type:'input',
-            //         name:"evento",
-            //         message:'EVENTO:'
-            //     }
-            // ])
             var selectEvento=await osBar()
             selectEvento.push(new inquirer.Separator())
             selectEvento.push("NOVO EVENTO")
@@ -519,43 +512,56 @@ const menu=async()=>{
                 clog(`Patrimonio:${colors.green(el.patrimonio).bold} Modelo:${colors.green(el.modelo).bold}`)
             }
         })
+        if(store.get("usuarioentrada")){
 
-        let patrimonioentrada=await prompt([
-            {
-                type:'input',
-                name:"patrimonio",
-                message:'PATRIMONIO:'
-            }
-        ])
-
-        if(patrimonioentrada.patrimonio){
-            let tester=await collection.findOne({'patrimonio':patrimonioentrada.patrimonio})
-            if(tester){
-                if(tester.evento=="deposito"){
-                    clog(`${colors.yellow("Não estava em Evento!!")}`)
-                    play('beep.wav')
+            let patrimonioentrada=await prompt([
+                {
+                    type:'input',
+                    name:"patrimonio",
+                    message:'PATRIMONIO:'
+                }
+            ])
+     
+            if(patrimonioentrada.patrimonio){
+                let tester=await collection.findOne({'patrimonio':patrimonioentrada.patrimonio})
+                if(tester){
+                    if(tester.evento=="deposito"){
+                        clog(`${colors.yellow("Não estava em Evento!!")}`)
+                        play('beep.wav')
+                        setTimeout(()=>{entrada()},2000)
+                    }
+                    else{
+                        try {
+            
+                            const retorno=await collection.findOneAndUpdate(patrimonioentrada,{ $set : { "data" : moment().format('DD/MM/YYYY'),'user':store.get("usuarioentrada"),"evento":"deposito"} })
+                            arrRetorno.push({patrimonio:retorno.patrimonio,modelo:retorno.modelo})
+                            play('beep.wav')
+                            entrada()
+                            
+                        } catch (error) {
+                            entrada()
+                        }
+                    }   
+                }else{
+                    clog(`${colors.red("Não Cadastrado")}`)
+                    arrRetorno.push({patrimonio:patrimonioentrada.patrimonio,modelo:'NÃO CADASTRADO'})
                     setTimeout(()=>{entrada()},2000)
                 }
-                else{
-                    try {
-        
-                        const retorno=await collection.findOneAndUpdate(patrimonioentrada,{ $set : { "data" : moment().format('DD/MM/YYYY'),'user':"admin","evento":"deposito"} })
-                        arrRetorno.push({patrimonio:retorno.patrimonio,modelo:retorno.modelo})
-                        play('beep.wav')
-                        entrada()
-                        
-                    } catch (error) {
-                        entrada()
-                    }
-                }   
             }else{
-                clog(`${colors.red("Não Cadastrado")}`)
-                arrRetorno.push({patrimonio:patrimonioentrada.patrimonio,modelo:'NÃO CADASTRADO'})
-                setTimeout(()=>{entrada()},2000)
+                menu()
             }
         }else{
-            menu()
+            let usuarioEntrada=await prompt([
+                {
+                    type:'list',
+                    name:"usuarioentrada",
+                    choices:["claudio","dourado"]
+                }
+            ])
+            store.set("usuarioentrada",usuarioEntrada.usuarioentrada)
+            entrada()
         }
+
 
     }
 

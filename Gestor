@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cd /home/claudio/Documentos/depositoMaster
+cd /home/claudio/Documentos/deposito
 npm start
