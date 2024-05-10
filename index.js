@@ -352,6 +352,7 @@ const menu=async()=>{
                         clog(`${colors.blue(el.patrimonio).bold} / ${colors.yellow(el.modelo).bold}`)
                         clog(colors.cyan('        --------------'))
                         clog(`${colors.green(el.data).bold} ${colors.red(el.user).bold} Evento:${colors.green(el.evento).bold}`)
+                        if(el.ultimoevento){clog(`Ultimo Evento:${colors.green(el.ultimoevento).bold} `)}
                         if(el.info){clog(colors.cyan(el.info).bold)}
                         clog(colors.yellow('----------------------------------------------------------------'))
                     })
@@ -533,7 +534,7 @@ const menu=async()=>{
                     else{
                         try {
             
-                            const retorno=await collection.findOneAndUpdate(patrimonioentrada,{ $set : { "data" : moment().format('DD/MM/YYYY'),'user':store.get("usuarioentrada"),"evento":"deposito"} })
+                            const retorno=await collection.findOneAndUpdate(patrimonioentrada,{ $set : { "data" : moment().format('DD/MM/YYYY'),'user':store.get("usuarioentrada"),"evento":"deposito",'ultimoevento':tester.evento} })
                             arrRetorno.push({patrimonio:retorno.patrimonio,modelo:retorno.modelo})
                             play('beep.wav')
                             entrada()
@@ -681,6 +682,9 @@ const menu=async()=>{
         break;
         case "Info":
             info()
+            break;
+        case "Serial":
+            serial()
             break;
         case 'EXIT':
             clearDisplay()
