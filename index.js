@@ -525,7 +525,7 @@ const menu=async()=>{
                 if(tester){
                     if(tester.evento=="deposito"){
                         clog(`${colors.yellow("Não estava em Evento!!")}`)
-                        if(os.type=="Linux"){play('beep.wav')}
+                        if(os.type()=="Linux"){play('beep.wav')}
                         setTimeout(()=>{entrada()},2000)
                     }
                     else{
@@ -533,7 +533,7 @@ const menu=async()=>{
             
                             const retorno=await collection.findOneAndUpdate(patrimonioentrada,{ $set : { "data" : moment().format('DD/MM/YYYY'),'user':store.get("usuarioentrada"),"evento":"deposito",'ultimoevento':tester.evento} })
                             arrRetorno.push({patrimonio:retorno.patrimonio,modelo:retorno.modelo,evento:tester.evento,info:retorno.info})
-                            if(os.type=="Linux"){play('beep.wav')}
+                            if(os.type()=="Linux"){play('beep.wav')}
                             entrada()
                             
                         } catch (error) {
