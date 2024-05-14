@@ -10,6 +10,7 @@ import colors from 'colors'
 import PDFDocument from "pdfkit-table"
 import fs from 'fs'
 import open from 'open'
+import os from "os"
 import {clearDisplay,clog,createArr,play} from './modules.js'
 
 
@@ -248,7 +249,11 @@ const menu=async()=>{
                                 });
         
                             doc.end();
-                            open(`pdf/${question.patrimonio}.pdf`,"firefox")
+                            if(os.type()=="Linux"){
+                                open(`pdf/${listaEventos.eventos}.pdf`,"firefox")
+                            }else{
+                                open(`pdf/${listaEventos.eventos}.pdf`,{app:"google chrome"})
+                            }
                             
                         }else{
                             clog(colors.red('------------------------- OS não exite -------------------------'))
@@ -302,7 +307,11 @@ const menu=async()=>{
                                     });
             
                                 doc.end();
-                                open(`pdf/${listaEventos.eventos}.pdf`,"firefox")
+                                if(os.type()=="Linux"){
+                                    open(`pdf/${listaEventos.eventos}.pdf`,"firefox")
+                                }else{
+                                    open(`pdf/${listaEventos.eventos}.pdf`,{app:"google chrome"})
+                                }
                                 
                             }else{
                                 clog(colors.red('------------------------- OS não exite -------------------------'))
@@ -516,7 +525,7 @@ const menu=async()=>{
                 if(tester){
                     if(tester.evento=="deposito"){
                         clog(`${colors.yellow("Não estava em Evento!!")}`)
-                        play('beep.wav')
+                        if(os.type=="Linux"){play('beep.wav')}
                         setTimeout(()=>{entrada()},2000)
                     }
                     else{
@@ -524,7 +533,7 @@ const menu=async()=>{
             
                             const retorno=await collection.findOneAndUpdate(patrimonioentrada,{ $set : { "data" : moment().format('DD/MM/YYYY'),'user':store.get("usuarioentrada"),"evento":"deposito",'ultimoevento':tester.evento} })
                             arrRetorno.push({patrimonio:retorno.patrimonio,modelo:retorno.modelo,evento:tester.evento,info:retorno.info})
-                            play('beep.wav')
+                            if(os.type=="Linux"){play('beep.wav')}
                             entrada()
                             
                         } catch (error) {
