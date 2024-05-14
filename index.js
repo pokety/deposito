@@ -135,10 +135,7 @@ const menu=async()=>{
                         cadastrar() 
                         break;
                 }
-
-                
             }
- 
         } catch (error) {
             menu()
         }
@@ -220,7 +217,6 @@ const menu=async()=>{
                     if(question.patrimonio!=""){
                         const result=await collection.find({$or:[{'patrimonio':question.patrimonio},{'modelo':{ $regex: question.patrimonio}}]}).toArray();
                         
-        
                         if(result.length >0){
         
                             const result2=await createArr(result)
@@ -232,9 +228,7 @@ const menu=async()=>{
                                 .font('Roboto-Italic.ttf')
                                 .fontSize(11)
                                 .text(`                                                                                    ${question.patrimonio}`);
-        
-                            
-        
+
                             const table = {
                                 headers: [
                                    { label:"Quantidade", property: 'qty', width: 50,renderer: (value, indexColumn, indexRow, row) => {
@@ -276,9 +270,7 @@ const menu=async()=>{
                         clearDisplay()
                         
                         if(listaEventos.eventos){
-                            const result=await collection.find({$or:[{'evento':listaEventos.eventos}]}).toArray();
-                            
-            
+                            const result=await collection.find({$or:[{'evento':listaEventos.eventos}]}).toArray();            
                             if(result.length >0){
             
                                 const result2=await createArr(result)
@@ -290,8 +282,6 @@ const menu=async()=>{
                                     .font('Roboto-Italic.ttf')
                                     .fontSize(11)
                                     .text(`                                                                                    ${result[0].evento}`);
-            
-                                
             
                                 const table = {
                                     headers: [
@@ -369,8 +359,6 @@ const menu=async()=>{
         }
     }
 
-
-
     ///////////saida
 
     var sair=[]
@@ -378,9 +366,9 @@ const menu=async()=>{
         clearDisplay()
         sair.forEach((el)=>{
             if(el.modelo==="Não Cadastrado"){
-                clog(`Patrimonio:${colors.green(el.patrimonio).bold} Modelo:${colors.red(el.modelo).bold}`)
+                clog(`Patrimonio:${colors.yellow(el.patrimonio).bold} Modelo:${colors.red(el.modelo).bold}`)
             }else{
-                clog(`Patrimonio:${colors.green(el.patrimonio).bold} Modelo:${colors.green(el.modelo).bold}`)
+                clog(`${colors.yellow(el.patrimonio).bold} |${colors.green(el.modelo).bold} ${el.info?colors.cyan(el.info).bold:''}`)
             }
         })
         store.get('usuarioSaida')!=undefined?clog(store.get('usuarioSaida')):clog('selecione usuario')
@@ -398,7 +386,7 @@ const menu=async()=>{
                 clog(store.get('dataevento'))
                 try {
                     const saiu=await collection.findOneAndUpdate(patrimonio,{ $set : { "data" : moment().format('DD/MM/YYYY'),'user':store.get('usuarioSaida'),"evento":store.get('evento')} })
-                    sair.push({patrimonio:saiu.patrimonio,modelo:saiu.modelo})
+                    sair.push({patrimonio:saiu.patrimonio,modelo:saiu.modelo,info:saiu.info})
                     saida()
                 } catch (error) {
                     sair.push({patrimonio:patrimonio.patrimonio,modelo:"Não Cadastrado"})
@@ -510,7 +498,7 @@ const menu=async()=>{
             if(el.modelo=='NÃO CADASTRADO'){
                 clog(`Patrimonio:${colors.green(el.patrimonio).bold} Modelo:${colors.red(el.modelo).bold}`)
             }else{
-                clog(`Patrimonio:${colors.green(el.patrimonio).bold} Modelo:${colors.green(el.modelo).bold}`)
+                clog(`${colors.blue(el.evento?el.evento:"deposito").bold} |${colors.yellow(el.patrimonio).bold} |${colors.green(el.modelo).bold} ${el.info?"|" +colors.cyan(el.info).bold:''}`)
             }
         })
         if(store.get("usuarioentrada")){
@@ -535,7 +523,7 @@ const menu=async()=>{
                         try {
             
                             const retorno=await collection.findOneAndUpdate(patrimonioentrada,{ $set : { "data" : moment().format('DD/MM/YYYY'),'user':store.get("usuarioentrada"),"evento":"deposito",'ultimoevento':tester.evento} })
-                            arrRetorno.push({patrimonio:retorno.patrimonio,modelo:retorno.modelo})
+                            arrRetorno.push({patrimonio:retorno.patrimonio,modelo:retorno.modelo,evento:tester.evento,info:retorno.info})
                             play('beep.wav')
                             entrada()
                             
@@ -549,6 +537,7 @@ const menu=async()=>{
                     setTimeout(()=>{entrada()},2000)
                 }
             }else{
+                store.set("usuarioentrada","")
                 menu()
             }
         }else{
