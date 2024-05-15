@@ -212,16 +212,28 @@ const menu=async()=>{
                         message:'--------------------evento ou patrimonio--------------------\n'
                     }
                 ])
+
                 try {
                     clearDisplay()
                     
+                    
                     if(question.patrimonio!=""){
+                        
                         const result=await collection.find({$or:[{'patrimonio':question.patrimonio},{'modelo':{ $regex: question.patrimonio}}]}).toArray();
                         
-                        if(result.length >0){
-        
-                            const result2=await createArr(result)
-                            
+                        const result2=await createArr(result)
+                        result2.forEach((el)=>{
+                            clog(`${colors.green(el.qty).bold} |  ${colors.yellow(el.modelo).bold}`)
+                        })
+                        
+                        const  confirm=await prompt({
+                            name:"printer",
+                            message:"imprimir?",
+                            type:"confirm"
+                        })
+
+                        if(result.length >0 && confirm.printer){
+
                             const doc = new PDFDocument({ margin: 30, size: 'A4'});
         
                             doc.pipe(fs.createWriteStream(`pdf/${question.patrimonio}.pdf`));
@@ -249,11 +261,9 @@ const menu=async()=>{
                                 });
         
                             doc.end();
-                            if(os.type()=="Linux"){
-                                open(`pdf/${listaEventos.eventos}.pdf`,"firefox")
-                            }else{
-                                open(`pdf/${listaEventos.eventos}.pdf`,{app:"google chrome"})
-                            }
+                            
+
+                            os.type()==="Linux"?open(`pdf/${question.patrimonio}.pdf`,"firefox"):open(`pdf/${question.patrimonio}.pdf`,{app:"google chrome"})
                             
                         }else{
                             clog(colors.red('------------------------- OS não exite -------------------------'))
@@ -276,10 +286,19 @@ const menu=async()=>{
                         
                         if(listaEventos.eventos){
                             const result=await collection.find({$or:[{'evento':listaEventos.eventos}]}).toArray();            
-                            if(result.length >0){
+                            const result2=await createArr(result)
+                            result2.forEach((el)=>{
+                                clog(`${colors.green(el.qty).bold} |  ${colors.yellow(el.modelo).bold} | ${colors.red(el.patrimonio).bold}`)
+                            })
+                            
+                            const  confirm=await prompt({
+                                name:"printer",
+                                message:"imprimir?",
+                                type:"confirm"
+                            })
+                            if(result.length >0 && confirm.printer){
             
-                                const result2=await createArr(result)
-                                
+
                                 const doc = new PDFDocument({ margin: 30, size: 'A4'});
             
                                 doc.pipe(fs.createWriteStream(`pdf/${listaEventos.eventos}.pdf`));
@@ -307,11 +326,7 @@ const menu=async()=>{
                                     });
             
                                 doc.end();
-                                if(os.type()=="Linux"){
-                                    open(`pdf/${listaEventos.eventos}.pdf`,"firefox")
-                                }else{
-                                    open(`pdf/${listaEventos.eventos}.pdf`,{app:"google chrome"})
-                                }
+                                os.type()==="Linux"?open(`pdf/${listaEventos.eventos}.pdf`,"firefox"):open(`pdf/${listaEventos.eventos}.pdf`,{app:"google chrome"})
                                 
                             }else{
                                 clog(colors.red('------------------------- OS não exite -------------------------'))
