@@ -410,9 +410,12 @@ const menu=async()=>{
                 clog(store.get('dataevento'))
                 try {
                     const saiu=await collection.findOneAndUpdate(patrimonio,{ $set : { "data" : moment().format('DD/MM/YYYY'),'user':store.get('usuarioSaida'),"evento":store.get('evento')} })
+                    if(sair.length ==10) {sair.shift()}
                     sair.push({patrimonio:saiu.patrimonio,modelo:saiu.modelo,info:saiu.info})
+                    play("beep.wav")
                     saida()
                 } catch (error) {
+                    if(sair.length ==10) {sair.shift()}
                     sair.push({patrimonio:patrimonio.patrimonio,modelo:"Não Cadastrado"})
                     saida()
                 }
@@ -540,15 +543,16 @@ const menu=async()=>{
                 if(tester){
                     if(tester.evento=="deposito"){
                         clog(`${colors.yellow("Não estava em Evento!!")}`)
-                        if(os.type()=="Linux"){play('beep.wav')}
-                        setTimeout(()=>{entrada()},2000)
+                        play('beep.wav')
+                        setTimeout(()=>{entrada()},500)
                     }
                     else{
                         try {
             
                             const retorno=await collection.findOneAndUpdate(patrimonioentrada,{ $set : { "data" : moment().format('DD/MM/YYYY'),'user':store.get("usuarioentrada"),"evento":"deposito",'ultimoevento':tester.evento} })
+                            if(arrRetorno.length == 10){arrRetorno.shift()}
                             arrRetorno.push({patrimonio:retorno.patrimonio,modelo:retorno.modelo,evento:tester.evento,info:retorno.info})
-                            if(os.type()=="Linux"){play('beep.wav')}
+                            play('beep.wav')
                             entrada()
                             
                         } catch (error) {
@@ -557,8 +561,10 @@ const menu=async()=>{
                     }   
                 }else{
                     clog(`${colors.red("Não Cadastrado")}`)
+                    if(arrRetorno.length == 10){arrRetorno.shift()}
                     arrRetorno.push({patrimonio:patrimonioentrada.patrimonio,modelo:'NÃO CADASTRADO'})
-                    setTimeout(()=>{entrada()},2000)
+                    play('beep.wav')
+                    setTimeout(()=>{entrada()},500)
                 }
             }else{
                 store.set("usuarioentrada","")

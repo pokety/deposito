@@ -1,14 +1,15 @@
 'strict mode'
 
-import {exec,spawn} from 'node:child_process'
+import {exec} from 'node:child_process'
 import os from 'os'
 
 async function play(file){
-  switch (os.platform()) {
+  switch (os.type()) {
     case 'win32':
-        await spawn(`(New-Object Media.SoundPlayer "C:\\deposito\\${file}.wav").Play()`)
+        await exec(`sox.exe ${file} -d`)
       break;
-    case 'linux':
+    case 'Linux':
+
       await exec(`play ${file}`)
       
       break;
