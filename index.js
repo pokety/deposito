@@ -229,7 +229,8 @@ const menu=async()=>{
                         const  confirm=await prompt({
                             name:"printer",
                             message:"imprimir?",
-                            type:"confirm"
+                            default: true,
+                            type:"confirm",
                         })
 
                         if(result.length >0 && confirm.printer){
@@ -411,7 +412,12 @@ const menu=async()=>{
                 try {
                     const saiu=await collection.findOneAndUpdate(patrimonio,{ $set : { "data" : moment().format('DD/MM/YYYY'),'user':store.get('usuarioSaida'),"evento":store.get('evento')} })
                     if(sair.length ==10) {sair.shift()}
-                    sair.push({patrimonio:saiu.patrimonio,modelo:saiu.modelo,info:saiu.info})
+
+                    if (!sair.some(obj => JSON.stringify(obj) === JSON.stringify({patrimonio:saiu.patrimonio,modelo:saiu.modelo,info:saiu.info}))) {
+                        sair.push({patrimonio:saiu.patrimonio,modelo:saiu.modelo,info:saiu.info}); // Adiciona o objeto ao array
+                    }
+
+                    //sair.push({patrimonio:saiu.patrimonio,modelo:saiu.modelo,info:saiu.info})
                     play("beep.wav")
                     saida()
                 } catch (error) {
