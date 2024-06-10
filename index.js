@@ -229,7 +229,7 @@ const menu=async()=>{
                         const  confirm=await prompt({
                             name:"printer",
                             message:"imprimir?",
-                            default: true,
+                            default: false,
                             type:"confirm",
                         })
 
@@ -295,7 +295,8 @@ const menu=async()=>{
                             const  confirm=await prompt({
                                 name:"printer",
                                 message:"imprimir?",
-                                type:"confirm"
+                                default: false,
+                                type:"confirm",
                             })
                             if(result.length >0 && confirm.printer){
             
@@ -417,7 +418,6 @@ const menu=async()=>{
                         sair.push({patrimonio:saiu.patrimonio,modelo:saiu.modelo,info:saiu.info}); // Adiciona o objeto ao array
                     }
 
-                    //sair.push({patrimonio:saiu.patrimonio,modelo:saiu.modelo,info:saiu.info})
                     play("beep.wav")
                     saida()
                 } catch (error) {
