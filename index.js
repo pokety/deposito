@@ -417,6 +417,7 @@ const menu=async()=>{
                 } catch (error) {
                     if(sair.length ==10) {sair.shift()}
                     sair.push({patrimonio:patrimonio.patrimonio,modelo:"Não Cadastrado"})
+                    play('beep.wav')
                     saida()
                 }
 
