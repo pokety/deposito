@@ -8,13 +8,10 @@ import { exit } from 'node:process'
 import moment from 'moment'
 import colors from 'colors'
 import PDFDocument from "pdfkit-table"
-import fs from 'fs'
+import fs from 'fs-extra'
 import open from 'open'
 import os from "os"
 import {clearDisplay,clog,createArr,play} from './modules.js'
-
-
-
 
 dotenv.config()
 
@@ -52,7 +49,6 @@ const allType=async()=>{
 const menu=async()=>{
     
 	clearDisplay()
-    //clog(await allType(tudo))
     clog(await osBar())
     store.clearAll()
     const question=await prompt({
@@ -422,7 +418,11 @@ const menu=async()=>{
                     saida()
                 } catch (error) {
                     if(sair.length ==10) {sair.shift()}
-                    sair.push({patrimonio:patrimonio.patrimonio,modelo:"Não Cadastrado"})
+
+                    if (!sair.some(obj => JSON.stringify(obj) === JSON.stringify({patrimonio:patrimonio.patrimonio,modelo:"Não Cadastrado"}))) {
+
+                        sair.push({patrimonio:patrimonio.patrimonio,modelo:"Não Cadastrado"})
+                    }
                     play('beep.wav')
                     saida()
                 }
@@ -440,6 +440,7 @@ const menu=async()=>{
                     choices:['claudio','dourado','MENU','EXIT']
                 }
             ])
+            
             
             var selectEvento=await osBar()
             selectEvento.push(new inquirer.Separator())
