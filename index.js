@@ -1,5 +1,6 @@
 'use strict'
 
+import LanScan from "lan-scan";
 import {MongoClient} from "mongodb";
 import inquirer from "inquirer";
 import dotenv from 'dotenv'
@@ -15,8 +16,13 @@ import {clearDisplay,clog,createArr,play} from './modules.js'
 
 dotenv.config()
 
+const PORT = 27018;
+
+const lanScan = new LanScan(PORT);
+const [openIps] = await lanScan.scanNetwork();
+
 var client
-client=new MongoClient(process.env.URI)
+client=new MongoClient(`mongodb://${openIps}:27018`)
 
 
 const db=client.db(process.env.DB)
