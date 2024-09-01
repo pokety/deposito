@@ -420,7 +420,7 @@ const menu=async()=>{
                         sair.push({patrimonio:saiu.patrimonio,modelo:saiu.modelo,info:saiu.info}); // Adiciona o objeto ao array
                     }
 
-                    play("beep.wav")
+                    play("./beep.wav")
                     saida()
                 } catch (error) {
                     if(sair.length ==10) {sair.shift()}
@@ -429,7 +429,7 @@ const menu=async()=>{
 
                         sair.push({patrimonio:patrimonio.patrimonio,modelo:"Não Cadastrado"})
                     }
-                    play('beep.wav')
+                    play('./beep.wav')
                     saida()
                 }
 
@@ -557,7 +557,7 @@ const menu=async()=>{
                 if(tester){
                     if(tester.evento=="deposito"){
                         clog(`${colors.yellow("Não estava em Evento!!")}`)
-                        play('beep.wav')
+                        play('./beep.wav')
                         setTimeout(()=>{entrada()},500)
                     }
                     else{
@@ -566,7 +566,7 @@ const menu=async()=>{
                             const retorno=await collection.findOneAndUpdate(patrimonioentrada,{ $set : { "data" : moment().format('DD/MM/YYYY'),'user':store.get("usuarioentrada"),"evento":"deposito",'ultimoevento':tester.evento} })
                             if(arrRetorno.length == 10){arrRetorno.shift()}
                             arrRetorno.push({patrimonio:retorno.patrimonio,modelo:retorno.modelo,evento:tester.evento,info:retorno.info})
-                            play('beep.wav')
+                            play('./beep.wav')
                             entrada()
                             
                         } catch (error) {
@@ -577,7 +577,7 @@ const menu=async()=>{
                     clog(`${colors.red("Não Cadastrado")}`)
                     if(arrRetorno.length == 10){arrRetorno.shift()}
                     arrRetorno.push({patrimonio:patrimonioentrada.patrimonio,modelo:'NÃO CADASTRADO'})
-                    play('beep.wav')
+                    play('./beep.wav')
                     setTimeout(()=>{entrada()},500)
                 }
             }else{
