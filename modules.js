@@ -2,15 +2,29 @@
 
 import {exec} from 'node:child_process'
 import os from 'os'
+import * as mm from 'music-metadata'
+
+async function getMusicDuration(filePath) {
+  try {
+    const metadata = await mm.parseFile(filePath);
+    const duration = metadata.format.duration; 
+
+    return duration
+  } catch (error) {
+    console.error(`Erro ao obter a duração do arquivo: ${error.message}`);
+  }
+}
+
 
 async function play(file){
+  let duracao=Math.floor(await getMusicDuration(file))
+
   switch (os.type()) {
     case 'win32':
-        await exec(`sox.exe ${file} -d`)
+      await spawn("./miniplay.exe", [`${file}`,duracao])      
       break;
     case 'Linux':
-
-      await exec(`play ${file}`)
+      await exec(`./miniplay ${file} ${duracao} `)
       
       break;
   
