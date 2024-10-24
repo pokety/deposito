@@ -157,7 +157,7 @@ const menu=async()=>{
                             },
                         ])
                         if(question.modelo){
-                            store.set('grupo',listaGrupos)
+                            store.set('grupo',listaGrupos.grupo)
                             store.set('modelo',question.modelo)
                             cadastrar() 
                         }else{
