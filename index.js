@@ -16,13 +16,13 @@ import {clearDisplay,clog,createArr,play} from './modules.js'
 
 dotenv.config()
 
-const PORT = 27018;
+const PORT = 27017;
 
 const lanScan = new LanScan(PORT);
 const [openIps] = await lanScan.scanNetwork();
-
+var ip=openIps?openIps:'localhost'
 var client
-client=new MongoClient(`mongodb://${openIps}:27018`)
+client=new MongoClient(`mongodb://${ip}:27017`)
 
 
 const db=client.db(process.env.DB)
@@ -52,6 +52,17 @@ const allType=async()=>{
     })
     return modelo.sort()
 }
+const allGrupos=async()=>{
+    let tudo=await collection.find().toArray()
+    var grupos=[]
+    tudo.forEach((el)=>{
+        if(!grupos.includes(el.grupo)){
+            grupos.push(el.grupo)
+        }
+    })
+    return grupos.sort()
+}
+
 const menu=async()=>{
     
 	clearDisplay()
@@ -85,6 +96,8 @@ const menu=async()=>{
                 newCad.evento='deposito'
                 newCad.info=''
                 newCad.modelo=store.get('modelo')
+                newCad.grupo=store.get('grupo')
+                
                 if(newCad.patrimonio){
                     try {
                         await collection.insertOne(newCad)
@@ -96,10 +109,20 @@ const menu=async()=>{
                     }
                 }else{
                     store.set('modelo','')
+                    store.set('grupo','')
                     menu()
                 }
             }else{
                 clearDisplay()
+                var selectGrupo=[]
+                selectGrupo.unshift(new inquirer.Separator())
+                selectGrupo.unshift('microfone')
+                selectGrupo.unshift('projetor')
+                selectGrupo.unshift('caixa de som')
+                selectGrupo.unshift('televisao')
+                selectGrupo.unshift('cabos')
+                selectGrupo.unshift('acessorios')
+                selectGrupo.unshift(new inquirer.Separator())
 
                 var selectModelo=await allType()
                 selectModelo.unshift(new inquirer.Separator())
@@ -107,6 +130,15 @@ const menu=async()=>{
                 selectModelo.unshift("NOVO MODELO")
                 selectModelo.unshift(new inquirer.Separator())
 
+
+
+                const listaGrupos=await prompt([
+                    {
+                        type:'list',
+                        name:"grupo",
+                        choices:selectGrupo
+                    }
+                ])
                 const listaModelos=await prompt([
                     {
                         type:'list',
@@ -114,6 +146,7 @@ const menu=async()=>{
                         choices:selectModelo
                     }
                 ])
+
                 switch (listaModelos.modelo ) {
                     case "NOVO MODELO":
                         const question=await prompt([
@@ -124,6 +157,7 @@ const menu=async()=>{
                             },
                         ])
                         if(question.modelo){
+                            store.set('grupo',listaGrupos)
                             store.set('modelo',question.modelo)
                             cadastrar() 
                         }else{
@@ -367,7 +401,7 @@ const menu=async()=>{
                 if(result.length >0){
                     
                     result.forEach(el => {
-                        clog(`${colors.blue(el.patrimonio).bold} / ${colors.yellow(el.modelo).bold}`)
+                        clog(`${colors.blue(el.patrimonio).bold} / ${el.grupo?colors.yellow(el.grupo).bold:"..."} / ${colors.yellow(el.modelo).bold}`)
                         clog(colors.cyan('        --------------'))
                         clog(`${colors.green(el.data).bold} ${colors.red(el.user).bold} Evento:${colors.green(el.evento).bold}`)
                         if(el.ultimoevento){clog(`Ultimo Evento:${colors.green(el.ultimoevento).bold} `)}
@@ -606,6 +640,16 @@ const menu=async()=>{
         selectModelo.unshift(new inquirer.Separator())
         selectModelo.unshift('MENU')
         selectModelo.unshift(new inquirer.Separator())
+        
+        var selectGrupo=[]
+        selectGrupo.unshift(new inquirer.Separator())
+        selectGrupo.unshift('microfone')
+        selectGrupo.unshift('projetor')
+        selectGrupo.unshift('caixa de som')
+        selectGrupo.unshift('televisao')
+        selectGrupo.unshift('cabos')
+        selectGrupo.unshift('acessorios')
+        selectGrupo.unshift(new inquirer.Separator())
 
         const oldName=await prompt([
             {
@@ -622,6 +666,14 @@ const menu=async()=>{
                 message:'novo Nome:'
             }
         ])
+        const grupoAdd=await prompt([
+            {
+                type:'list',
+                name:"grupo",
+                choices:selectGrupo
+            }
+        ])
+
         const password=await prompt([
             {
                 type:'password',
@@ -630,12 +682,12 @@ const menu=async()=>{
             }
         ])
 
-        if(oldName.oldname!=""&& newName.newname!="" && password.password==process.env.ADMIN_PASSWORD){
+        if(oldName.oldname!=""&& newName.newname!=""&&  grupoAdd.grupo!=""&& password.password==process.env.ADMIN_PASSWORD){
   
             var recursive=true
             try {
                 do {
-                    const result=await collection.findOneAndUpdate({'modelo':oldName.oldname},{$set:{"modelo":newName.newname}})
+                    const result=await collection.findOneAndUpdate({'modelo':oldName.oldname},{$set:{"modelo":newName.newname,"grupo":grupoAdd.grupo}})
                     result?recursive=true:recursive=false
                 } while (recursive);
                 setTimeout(()=>{
