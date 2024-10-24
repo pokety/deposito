@@ -60,8 +60,9 @@ const createArr=(arr)=>{
         Fpatrimonio.push(el.patrimonio);
       }
     });
-
+    
     mod.modelo = ele;
+    //mod.grupo= el.grupo
     mod.patrimonio = `${Fpatrimonio.join(' - ')}`;
     mod.qty = `${Fpatrimonio.length}`
     newsObj.push(mod);

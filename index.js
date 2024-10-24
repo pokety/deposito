@@ -22,7 +22,7 @@ const lanScan = new LanScan(PORT);
 const [openIps] = await lanScan.scanNetwork();
 var ip=openIps?openIps:'localhost'
 var client
-client=new MongoClient(`mongodb://${ip}:27017`)
+client=new MongoClient(`mongodb://[2804:d56:2d4:d100:2010:e1ff:fe18:427]:27017`)
 
 
 const db=client.db(process.env.DB)
@@ -257,7 +257,9 @@ const menu=async()=>{
                         
                         const result=await collection.find({$or:[{'patrimonio':question.patrimonio},{'modelo':{ $regex: question.patrimonio}}]}).toArray();
                         
-                        const result2=await createArr(result)
+                        var result2=await createArr(result)
+                        result2=result2.sort((a, b) => a.grupo - b.grupo);
+
                         result2.forEach((el)=>{
                             clog(`${colors.green(el.qty).bold} |  ${colors.yellow(el.modelo).bold}`)
                         })
@@ -284,6 +286,7 @@ const menu=async()=>{
                                    { label:"Quantidade", property: 'qty', width: 50,renderer: (value, indexColumn, indexRow, row) => {
                                         return `  ${value}` }},
                                     { label:"Modelo", property: 'modelo', width: 90, renderer: null  }, 
+                                    { label:"Grupo", property: 'grupo', width: 90, renderer: null  }, 
                                     { label:"Patrimonio", property: 'patrimonio', width: 400, renderer: null }, 
                                     
                                 ],
@@ -323,9 +326,11 @@ const menu=async()=>{
                         
                         if(listaEventos.eventos){
                             const result=await collection.find({$or:[{'evento':listaEventos.eventos}]}).toArray();            
-                            const result2=await createArr(result)
+                            var result2=await createArr(result)
+                            result2=result2.sort((a, b) => a.grupo - b.grupo);
+                            console.log(result2)
                             result2.forEach((el)=>{
-                                clog(`${colors.green(el.qty).bold} |  ${colors.yellow(el.modelo).bold} | ${colors.red(el.patrimonio).bold}`)
+                                clog(`${colors.green(el.qty).bold} | ${colors.yellow(el.grupo).bold} | ${colors.yellow(el.modelo).bold} | ${colors.red(el.patrimonio).bold}`)
                             })
                             
                             const  confirm=await prompt({
@@ -350,6 +355,7 @@ const menu=async()=>{
                                        { label:"Quantidade", property: 'qty', width: 50,renderer: (value, indexColumn, indexRow, row) => {
                                             return `  ${value}` }},
                                         { label:"Modelo", property: 'modelo', width: 90, renderer: null  }, 
+                                        { label:"Grupo", property: 'grupo', width: 90, renderer: null  }, 
                                         { label:"Patrimonio", property: 'patrimonio', width: 400, renderer: null }, 
                                         
                                     ],
