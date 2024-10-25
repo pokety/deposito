@@ -407,7 +407,7 @@ const menu=async()=>{
                 if(result.length >0){
                     
                     result.forEach(el => {
-                        clog(`${colors.blue(el.patrimonio).bold} / ${el.grupo?colors.yellow(el.grupo).bold:"..."} / ${colors.yellow(el.modelo).bold}`)
+                        clog(`${colors.blue(el.patrimonio).bold} / ${el.grupo?colors.cyan(el.grupo).bold:"..."} / ${colors.yellow(el.modelo).bold}`)
                         clog(colors.cyan('        --------------'))
                         clog(`${colors.green(el.data).bold} ${colors.red(el.user).bold} Evento:${colors.green(el.evento).bold}`)
                         if(el.ultimoevento){clog(`Ultimo Evento:${colors.green(el.ultimoevento).bold} `)}
