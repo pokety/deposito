@@ -258,7 +258,6 @@ const menu=async()=>{
                         const result=await collection.find({$or:[{'patrimonio':question.patrimonio},{'modelo':{ $regex: question.patrimonio}}]}).toArray();
                         
                         var result2=await createArr(result)
-                        result2=result2.sort((a, b) => a.grupo - b.grupo);
 
                         result2.forEach((el)=>{
                             clog(`${colors.green(el.qty).bold} |  ${colors.yellow(el.modelo).bold}`)
@@ -286,7 +285,6 @@ const menu=async()=>{
                                    { label:"Quantidade", property: 'qty', width: 50,renderer: (value, indexColumn, indexRow, row) => {
                                         return `  ${value}` }},
                                     { label:"Modelo", property: 'modelo', width: 90, renderer: null  }, 
-                                    { label:"Grupo", property: 'grupo', width: 90, renderer: null  }, 
                                     { label:"Patrimonio", property: 'patrimonio', width: 400, renderer: null }, 
                                     
                                 ],
@@ -330,7 +328,7 @@ const menu=async()=>{
                             result2=result2.sort((a, b) => a.grupo - b.grupo);
                             console.log(result2)
                             result2.forEach((el)=>{
-                                clog(`${colors.green(el.qty).bold} | ${colors.yellow(el.grupo).bold} | ${colors.yellow(el.modelo).bold} | ${colors.red(el.patrimonio).bold}`)
+                                clog(`${colors.green(el.qty).bold} | ${el.grupo?colors.cyan(el.grupo).bold:"..."} | ${colors.yellow(el.modelo).bold} | ${colors.red(el.patrimonio).bold}`)
                             })
                             
                             const  confirm=await prompt({
