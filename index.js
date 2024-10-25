@@ -329,7 +329,6 @@ const menu=async()=>{
                             const result=await collection.find({$or:[{'evento':listaEventos.eventos}]}).toArray();            
                             var result2=await createArr(result)
                             result2=result2.sort((a, b) => a.grupo - b.grupo);
-                            console.log(result2)
                             result2.forEach((el)=>{
                                 clog(`${colors.green(el.qty).bold} | ${el.grupo?colors.cyan(el.grupo).bold:"..."} | ${colors.yellow(el.modelo).bold} | ${colors.red(el.patrimonio).bold}`)
                             })
@@ -353,10 +352,10 @@ const menu=async()=>{
             
                                 const table = {
                                     headers: [
-                                       { label:"Quantidade", property: 'qty', width: 50,renderer: (value, indexColumn, indexRow, row) => {
+                                        { label:"Quantidade", property: 'qty', width: 50,renderer: (value, indexColumn, indexRow, row) => {
                                             return `  ${value}` }},
+                                        { label:"Grupo", property: 'grupo', width: 70, renderer: null  }, 
                                         { label:"Modelo", property: 'modelo', width: 90, renderer: null  }, 
-                                        { label:"Grupo", property: 'grupo', width: 90, renderer: null  }, 
                                         { label:"Patrimonio", property: 'patrimonio', width: 400, renderer: null }, 
                                         
                                     ],
