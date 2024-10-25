@@ -83,20 +83,21 @@ const menu=async()=>{
 
             if(store.get("modelo")){
                 clog(store.get("modelo"))
-                const newCad=await prompt([
+                var newCad=await prompt([
                     {
                         type:'input',
                         name:"patrimonio",
                         message:'Patrimonio:'
                     }
                 ])
-                
+
                 newCad.data=moment().format('DD/MM/YYYY')
                 newCad.user='admin'
                 newCad.evento='deposito'
                 newCad.info=''
                 newCad.modelo=store.get('modelo')
                 newCad.grupo=store.get('grupo')
+
                 
                 if(newCad.patrimonio){
                     try {
@@ -156,6 +157,8 @@ const menu=async()=>{
                                 message:'Modelo:'
                             },
                         ])
+                        question.modelo=question.modelo.trim()
+                        question.modelo=question.modelo.replaceAll(/[/,!,?,*,+,%,@,`,~,;,:]/g,'-');
                         if(question.modelo){
                             store.set('grupo',listaGrupos.grupo)
                             store.set('modelo',question.modelo)
@@ -255,7 +258,7 @@ const menu=async()=>{
                     
                     if(question.patrimonio!=""){
                         
-                        const result=await collection.find({$or:[{'patrimonio':question.patrimonio},{'modelo':{ $regex: question.patrimonio}}]}).toArray();
+                        const result=await collection.find({$or:[{'patrimonio':{$regex:question.patrimonio}},{'modelo':{ $regex: question.patrimonio}}]}).toArray();
                         
                         var result2=await createArr(result)
 
@@ -512,8 +515,9 @@ const menu=async()=>{
                                     message:'EVENTO:'
                                 }
                             ])
-
-                            store.set('evento',evento.evento.trim())
+                            evento.evento=evento.evento.trim()
+                            evento.evento=evento.evento.replace(/[/,!,?,*,+,%,@,`,~,;,:]/g, '-');
+                            store.set('evento',evento.evento)
 
                             saida()
                             break;
@@ -539,8 +543,9 @@ const menu=async()=>{
                                     message:'EVENTO:'
                                 }
                             ])
-
-                            store.set('evento',evento.evento.trim())
+                            evento.evento=evento.evento.trim()
+                            evento.evento=evento.evento.replace(/[/,!,?,*,+,%,@,`,~,;,:]/g, '-');
+                            store.set('evento',evento.evento)
 
                             saida()
                             break;
@@ -670,6 +675,8 @@ const menu=async()=>{
                 message:'novo Nome:'
             }
         ])
+        newName.newname.trim()
+        newName.newname.replaceAll(/[/,!,?,*,+,%,@,`,~,;,:]/g, ' ');
         const grupoAdd=await prompt([
             {
                 type:'list',
