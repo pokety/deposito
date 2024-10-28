@@ -44,33 +44,6 @@ function clog(args){
   console.log(args)
 }
 
-// const createArr=(arr)=>{
-//   var newArr = [];
-//   var newsObj = [];
-//   arr.forEach((el) => {
-//     if (!newArr.includes(el.modelo)) {
-      
-//       newArr.push(el.modelo);
-//     }
-//   });
-//   newArr.forEach((ele) => {
-//     var Fpatrimonio = [];
-//     const mod = {};
-//     arr.forEach((el) => {
-//       if (el.modelo === ele) {
-//         Fpatrimonio.push(el.patrimonio);
-//       }
-//     });
-    
-//     mod.modelo = ele;
-//     //mod.grupo= el.grupo
-//     mod.patrimonio = `${Fpatrimonio.join(' - ')}`;
-//     mod.qty = `${Fpatrimonio.length}`
-//     newsObj.push(mod);
-//   });
-//   return newsObj;
-// };
-
 const createArr=(arr)=>{
   var newArr = [];
   var newsObj = [];

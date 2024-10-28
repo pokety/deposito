@@ -22,7 +22,7 @@ const lanScan = new LanScan(PORT);
 const [openIps] = await lanScan.scanNetwork();
 var ip=openIps?openIps:'localhost'
 var client
-client=new MongoClient(`mongodb://[2804:d56:2d4:d100:2010:e1ff:fe18:427]:27017`)
+client=new MongoClient(`mongodb://pokety:396350@[2804:d56:2d4:d100:2010:e1ff:fe18:427]:27017`)
 
 
 const db=client.db(process.env.DB)
@@ -72,7 +72,7 @@ const menu=async()=>{
         type:'list',
         name:"name",
         message:'MENU',
-        choices:['Procurar','Entrada','Saida','Imprimir',new inquirer.Separator(),"Renomear",'Cadastrar','Info','Deletar',new inquirer.Separator(),'EXIT',new inquirer.Separator()]
+        choices:['Procurar','Entrada','Saida','Imprimir',new inquirer.Separator(),"Renomear","Grupos",'Cadastrar','Info','Deletar',new inquirer.Separator(),'EXIT',new inquirer.Separator()]
     })
 
 
@@ -395,14 +395,14 @@ const menu=async()=>{
             {
                 type:'input',
                 name:"patrimonio",
-                message:'--------------------evento ou patrimonio--------------------\n'
+                message:'--------------------evento / patrimonio / grupo --------------------\n'
             }
         ])
         try {
             clearDisplay()
             
             if(question.patrimonio!=""){
-                const result=await collection.find({$or:[{'patrimonio':question.patrimonio},{'evento':question.patrimonio},{'modelo':{ $regex: question.patrimonio}}]}).toArray();
+                const result=await collection.find({$or:[{'patrimonio':question.patrimonio},{'evento':question.patrimonio},{'modelo':{ $regex: question.patrimonio}},{'grupo':{ $regex: question.patrimonio}}]}).toArray();
 
                 if(result.length >0){
                     
@@ -641,6 +641,62 @@ const menu=async()=>{
 
     }
 
+    //////add to group
+
+    const toGroup=async()=>{
+        clearDisplay()
+
+        var selectGrupo=[]
+        selectGrupo.unshift(new inquirer.Separator())
+        selectGrupo.unshift('microfone')
+        selectGrupo.unshift('projetor')
+        selectGrupo.unshift('caixa de som')
+        selectGrupo.unshift('televisao')
+        selectGrupo.unshift('cabos')
+        selectGrupo.unshift('acessorios')
+        selectGrupo.unshift(new inquirer.Separator())
+
+        var selectModelo=await allType()
+        selectModelo.unshift(new inquirer.Separator())
+        selectModelo.unshift('MENU')
+        selectModelo.unshift(new inquirer.Separator())
+        
+
+        const equipamentoNome=await prompt([
+            {
+                type:'list',
+                name:"nome",
+                choices:selectModelo
+            }
+        ])
+
+        const grupoAdd=await prompt([
+            {
+                type:'list',
+                name:"grupo",
+                choices:selectGrupo
+            }
+        ])
+
+        if(equipamentoNome.nome!=""&&  grupoAdd.grupo!=""){
+            try {   
+                const result=await collection.updateMany({'modelo':equipamentoNome.nome},{$set:{"grupo":grupoAdd.grupo}})
+                setTimeout(()=>{
+                    menu()
+                },1000)
+            } catch (error) {
+                clog(colors.red('Erro!!!'))
+                setTimeout(()=>{
+                    menu()
+                },2000)
+            }
+        }else{
+            menu()
+            
+        }
+
+    }
+
     //////renomear
 
     const renomear=async()=>{
@@ -774,6 +830,9 @@ const menu=async()=>{
         break;
         case "Renomear":
             renomear()
+        break;
+        case "Grupos":
+            toGroup()
         break;
         case "Info":
             info()
