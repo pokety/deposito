@@ -262,9 +262,14 @@ const menu=async()=>{
                         const result=await collection.find({$or:[{'patrimonio':{$regex:question.patrimonio}},{'modelo':{ $regex: question.patrimonio}}]}).toArray();
                         
                         var result2=await createArr(result)
+                        result2=result2.sort((a, b) => {
+                            if (a.grupo < b.grupo) return -1;
+                            if (a.grupo > b.grupo) return 1;
+                            return 0;
+                          });
 
                         result2.forEach((el)=>{
-                            clog(`${colors.green(el.qty).bold} |  ${colors.yellow(el.modelo).bold}`)
+                            clog(`${colors.green(el.qty).bold} | ${colors.cyan(el.grupo).bold} | ${colors.yellow(el.modelo).bold}`)
                         })
                         
                         const  confirm=await prompt({
