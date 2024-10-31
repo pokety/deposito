@@ -20,7 +20,7 @@ const PORT = 27017;
 
 const lanScan = new LanScan(PORT);
 const [openIps] = await lanScan.scanNetwork();
-var ip=openIps?openIps:'10.1.1.7'
+var ip=openIps?openIps:'pokety:396350@localhost'
 var client
 client=new MongoClient(`mongodb://${ip}:27017`)
 
@@ -329,7 +329,13 @@ const menu=async()=>{
                         if(listaEventos.eventos){
                             const result=await collection.find({$or:[{'evento':listaEventos.eventos}]}).toArray();            
                             var result2=await createArr(result)
-                            result2=result2.sort((a, b) => a.grupo - b.grupo);
+
+                            result2=result2.sort((a, b) => {
+                                if (a.grupo < b.grupo) return -1;
+                                if (a.grupo > b.grupo) return 1;
+                                return 0;
+                              });
+
                             result2.forEach((el)=>{
                                 clog(`${colors.green(el.qty).bold} | ${el.grupo?colors.cyan(el.grupo).bold:"..."} | ${colors.yellow(el.modelo).bold} | ${colors.red(el.patrimonio).bold}`)
                             })
