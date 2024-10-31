@@ -20,10 +20,9 @@ const PORT = 27017;
 
 const lanScan = new LanScan(PORT);
 const [openIps] = await lanScan.scanNetwork();
-var ip=openIps?openIps:'localhost'
+var ip=openIps?openIps:'10.1.1.7'
 var client
-client=new MongoClient(`mongodb://pokety:396350@[2804:d56:2d4:d100:2010:e1ff:fe18:427]:27017`)
-
+client=new MongoClient(`mongodb://${ip}:27017`)
 
 const db=client.db(process.env.DB)
 const collection=db.collection(process.env.COLLECTION)
@@ -122,6 +121,8 @@ const menu=async()=>{
                 selectGrupo.unshift('caixa de som')
                 selectGrupo.unshift('televisao')
                 selectGrupo.unshift('cabos')
+                selectGrupo.unshift('extensao')
+                selectGrupo.unshift('comunicacao')
                 selectGrupo.unshift('acessorios')
                 selectGrupo.unshift(new inquirer.Separator())
 
@@ -483,7 +484,7 @@ const menu=async()=>{
                 {
                     type:'list',
                     name:"user",
-                    choices:['claudio','dourado','MENU','EXIT']
+                    choices:['claudio','eyler','dourado','MENU','EXIT']
                 }
             ])
             
@@ -502,6 +503,34 @@ const menu=async()=>{
             ])
 
             switch (user.user) {
+                case 'eyler':
+                    store.set('usuarioSaida','eyler')
+                    clearDisplay()
+                    switch (listaEventos.eventos ) {
+                        case "NOVO EVENTO":
+                            const evento=await prompt([
+                                {
+                                    type:'input',
+                                    name:"evento",
+                                    message:'EVENTO:'
+                                }
+                            ])
+                            evento.evento=evento.evento.trim()
+                            evento.evento=evento.evento.replace(/[/,!,?,*,+,%,@,`,~,;,:]/g, '-');
+                            store.set('evento',evento.evento)
+
+                            saida()
+                            break;
+                        case "MENU":
+                                menu()
+                        break;
+                        default:
+                            store.set('evento',listaEventos.eventos)
+                            saida()
+                            break;
+                    }
+
+                    break;
                 case 'claudio':
                     store.set('usuarioSaida','claudio')
                     clearDisplay()
@@ -631,7 +660,7 @@ const menu=async()=>{
                 {
                     type:'list',
                     name:"usuarioentrada",
-                    choices:["claudio","dourado"]
+                    choices:["claudio",'eyler',"dourado"]
                 }
             ])
             store.set("usuarioentrada",usuarioEntrada.usuarioentrada)
@@ -653,6 +682,8 @@ const menu=async()=>{
         selectGrupo.unshift('caixa de som')
         selectGrupo.unshift('televisao')
         selectGrupo.unshift('cabos')
+        selectGrupo.unshift('extensao')
+        selectGrupo.unshift('comunicacao')
         selectGrupo.unshift('acessorios')
         selectGrupo.unshift(new inquirer.Separator())
 
@@ -712,6 +743,8 @@ const menu=async()=>{
         selectGrupo.unshift('caixa de som')
         selectGrupo.unshift('televisao')
         selectGrupo.unshift('cabos')
+        selectGrupo.unshift('extensao')    
+        selectGrupo.unshift('comunicacao')   
         selectGrupo.unshift('acessorios')
         selectGrupo.unshift(new inquirer.Separator())
 
