@@ -338,16 +338,15 @@ const menu=async()=>{
                                 return 0;
                               });
 
+                            var txtPrint=''
+
                             result2.forEach((el)=>{
-                                clog(`${colors.green(el.qty).bold}${'\u2008'.repeat(el.qty.length)}| ${el.grupo?colors.cyan(el.grupo).bold:"..."}${'\u2008'.repeat(12 - el.grupo.length)}| ${colors.yellow(el.modelo).bold}${'\u2008'.repeat(40 - el.modelo.length)}| ${colors.red(el.patrimonio).bold}`)
-                                fs.writeFileSync(`./PDF/${listaEventos.eventos}.txt`,`${el.qty}${'\u2008'.repeat(el.qty.length)}| ${el.grupo?el.grupo:"..."}${'\u2008'.repeat(12 - el.grupo.length)}| ${el.modelo}${'\u2008'.repeat(40 - el.modelo.length)}| ${el.patrimonio}\n`,
-                                { 
-                                    encoding: "utf8", 
-                                    flag: "a+", 
-                                    mode: 0o666 
-                                    }) 
+                                clog(`${colors.green(el.qty).bold}${'\u2008'.repeat(3 - el.qty.length)}| ${el.grupo?colors.cyan(el.grupo).bold :"..."}${el.grupo?'\u2008'.repeat(12 - el.grupo.length):'\u2008'.repeat(9)}| ${colors.yellow(el.modelo).bold}${'\u2008'.repeat(40 - el.modelo.length)}| ${colors.red(el.patrimonio).bold}`)
+                                txtPrint+=`${el.qty}${'\u2008'.repeat(3 - el.qty.length)}| ${el.grupo?el.grupo:"..."}${el.grupo?'\u2008'.repeat(12 - el.grupo.length):'\u2008'.repeat(9)}| ${el.modelo}${'\u2008'.repeat(40 - el.modelo.length)}| ${el.patrimonio}\n`
                             })
                             
+                            fs.writeFileSync(`./PDF/${listaEventos.eventos}.txt`,txtPrint,{ encoding: "utf8"}) 
+
                             const  confirm=await prompt({
                                 name:"printer",
                                 message:"imprimir?",
@@ -395,6 +394,7 @@ const menu=async()=>{
                             menu()
                         }   
                     } catch (error) {
+                        // console.log(error)
                         menu()
                     }
                 break;
