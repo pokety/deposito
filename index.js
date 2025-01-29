@@ -1,6 +1,6 @@
 'use strict'
 
-import {MongoClient} from "mongodb";
+import {MongoClient, ServerApiVersion} from "mongodb";
 import inquirer from "inquirer";
 import dotenv from 'dotenv'
 import store from'store'
@@ -12,8 +12,9 @@ import fs from 'fs-extra'
 import open from 'open'
 import os from "os"
 import {clearDisplay,clog,createArr,play} from './modules.js'
-
-
+import Monitor from "./monitor.js";
+let monitor=new Monitor()
+store.set("qtyModel",'uva')
 dotenv.config()
 
 const listarGrupos=["IMAGEM","AUDIO","ENERGIA","COMUNICACAO"]
@@ -24,6 +25,7 @@ client=new MongoClient(`mongodb://${process.env.M_USER}:${process.env.M_PASSWORD
 
 const db=client.db(process.env.DB)
 const collection=db.collection(process.env.COLLECTION)
+// console.log(await collection.find().toArray())
 
 collection.createIndex( { "patrimonio": 1 }, { unique: true } )
 
@@ -49,6 +51,11 @@ const allType=async()=>{
     })
     return modelo.sort()
 }
+
+function checkAvailability(arr, val) {
+    return arr.some((arrVal) => arrVal.patrimonio=== val.patrimonio);
+}
+
 const allGrupos=async()=>{
     let tudo=await collection.find().toArray()
     var grupos=[]
@@ -69,7 +76,8 @@ const menu=async()=>{
         type:'list',
         name:"name",
         message:'MENU',
-        choices:['Procurar','Entrada','Saida','Imprimir',new inquirer.Separator(),"Renomear","Grupos",'Cadastrar','Info','Deletar',new inquirer.Separator(),'EXIT',new inquirer.Separator()]
+        pageSize:15,
+        choices:['Procurar','Entrada','Saida','Imprimir',new inquirer.Separator(),"Renomear","Grupos","Grupos/Modelos",'Cadastrar','Info','Deletar',new inquirer.Separator(),'EXIT',new inquirer.Separator()]
     })
 
 
@@ -96,7 +104,7 @@ const menu=async()=>{
                 newCad.grupo=store.get('grupo')
 
                 
-                if(newCad.patrimonio){
+                if(newCad.patrimonio.trim().match(/([0-9])\d{5,5}/g)){
                     try {
                         await collection.insertOne(newCad)
                         clog(`Patrimonio:${colors.green(newCad.patrimonio).bold}  Cadastrado`)
@@ -331,7 +339,13 @@ const menu=async()=>{
                               });
 
                             result2.forEach((el)=>{
-                                clog(`${colors.green(el.qty).bold} | ${el.grupo?colors.cyan(el.grupo).bold:"..."} | ${colors.yellow(el.modelo).bold} | ${colors.red(el.patrimonio).bold}`)
+                                clog(`${colors.green(el.qty).bold}${'\u2008'.repeat(el.qty.length)}| ${el.grupo?colors.cyan(el.grupo).bold:"..."}${'\u2008'.repeat(12 - el.grupo.length)}| ${colors.yellow(el.modelo).bold}${'\u2008'.repeat(40 - el.modelo.length)}| ${colors.red(el.patrimonio).bold}`)
+                                fs.writeFileSync(`./PDF/${listaEventos.eventos}.txt`,`${el.qty}${'\u2008'.repeat(el.qty.length)}| ${el.grupo?el.grupo:"..."}${'\u2008'.repeat(12 - el.grupo.length)}| ${el.modelo}${'\u2008'.repeat(40 - el.modelo.length)}| ${el.patrimonio}\n`,
+                                { 
+                                    encoding: "utf8", 
+                                    flag: "a+", 
+                                    mode: 0o666 
+                                    }) 
                             })
                             
                             const  confirm=await prompt({
@@ -430,9 +444,18 @@ const menu=async()=>{
 
     ///////////saida
 
+
     var sair=[]
+
     const saida=async()=>{
         clearDisplay()
+        if( store.get('evento')){
+            let result=await collection.find({$and:[{"evento":store.get('evento')},{"modelo":store.get("qtyModel")}]}).toArray()
+
+            monitor.draw(store.get("qtyModel"),result.length)
+        }
+
+
         sair.forEach((el)=>{
             if(el.modelo==="Não Cadastrado"){
                 console.log(`Patrimonio:${colors.yellow(el.patrimonio).bold} Modelo:${colors.red(el.modelo).bold}`)
@@ -456,21 +479,18 @@ const menu=async()=>{
                 try {
                     const saiu=await collection.findOneAndUpdate(patrimonio,{ $set : { "data" : moment().format('DD/MM/YYYY'),'user':store.get('usuarioSaida'),"evento":store.get('evento')} })
                     if(sair.length ==10) {sair.shift()}
-
-                    if (!sair.some(obj => JSON.stringify(obj) === JSON.stringify({patrimonio:saiu.value.patrimonio,modelo:saiu.value.modelo,info:saiu.value.info}))) {
-                        sair.push({patrimonio:saiu.value.patrimonio,modelo:saiu.value.modelo,info:saiu.value.info}); // Adiciona o objeto ao array
+                    store.set("qtyModel",saiu.modelo)
+                    if(!checkAvailability(sair,{patrimonio:saiu.patrimonio,modelo:saiu.modelo,info:saiu.info,evento:saiu.evento})) {
+                        sair.push({patrimonio:saiu.patrimonio,modelo:saiu.modelo,info:saiu.info,evento:saiu.evento}); // Adiciona o objeto ao array
+                        play("./beep.wav")
                     }
-
-                    play("./beep.wav")
                     saida()
                 } catch (error) {
                     if(sair.length ==10) {sair.shift()}
 
                     if (!sair.some(obj => JSON.stringify(obj) === JSON.stringify({patrimonio:patrimonio.patrimonio,modelo:"Não Cadastrado"}))) {
-
                         sair.push({patrimonio:patrimonio.patrimonio,modelo:"Não Cadastrado"})
                     }
-                    play('./beep.wav')
                     saida()
                 }
 
@@ -608,7 +628,7 @@ const menu=async()=>{
 
     var arrRetorno=[]
     const entrada=async()=>{
-        // clearDisplay()
+        clearDisplay()
         arrRetorno.forEach((el)=>{
             if(el.modelo=='NÃO CADASTRADO'){
                 clog(`Patrimonio:${colors.green(el.patrimonio).bold} Modelo:${colors.red(el.modelo).bold}`)
@@ -639,7 +659,7 @@ const menu=async()=>{
             
                             const retorno=await collection.findOneAndUpdate(patrimonioentrada,{ $set : { "data" : moment().format('DD/MM/YYYY'),'user':store.get("usuarioentrada"),"evento":"deposito",'ultimoevento':tester.evento} })
                             if(arrRetorno.length == 10){arrRetorno.shift()}
-                            arrRetorno.push({patrimonio:retorno.value.patrimonio,modelo:retorno.value.modelo,evento:tester.evento,info:retorno.value.info})
+                            arrRetorno.push({patrimonio:retorno.patrimonio,modelo:retorno.modelo,evento:tester.evento,info:retorno.info})
                             play('./beep.wav')
                             entrada()
                             
@@ -717,6 +737,59 @@ const menu=async()=>{
             menu()
         }
     }
+      //////add all to group
+
+      const AlltoGroup=async()=>{
+        clearDisplay()
+        const selectModelo=await allType()
+        selectModelo.unshift(new inquirer.Separator())
+        selectModelo.unshift('MENU')
+        selectModelo.unshift(new inquirer.Separator())
+
+        
+        const modelo=await prompt([
+            {
+                type:'list',
+                name:"modelo",
+                choices:selectModelo,      
+                message:"selecione o modelo:",
+                pageSize:40
+            }
+        ]);
+      
+        
+        switch(modelo.modelo){
+            case "MENU" :
+                menu()
+                break;
+            default:
+                const grupoAdd=await prompt([
+                    {
+                        type:'list',
+                        name:"grupo",
+                        choices:listarGrupos,
+                        message:"Grupo:"
+                    }
+                ])
+        
+                if(grupoAdd.grupo && modelo.modelo){
+        
+                    try {  
+                        const result=await collection.updateMany({'modelo':modelo.modelo},{$set:{"grupo":grupoAdd.grupo}})
+                        setTimeout(()=>{
+                            menu()
+                        },2000)
+                    } catch (error) {
+                    clog(colors.red('Erro!!!'))
+                    setTimeout(()=>{
+                        menu()
+                    },2000)
+                } 
+                }else{
+                    menu()   
+                }
+        }
+    }
 
     //////renomear
 
@@ -735,45 +808,51 @@ const menu=async()=>{
                 message:"Modelo:"
             }
         ])
-
-        const newName=await prompt([
-            {
-                type:'input',
-                name:"newname",
-                message:'novo Nome:'
+        switch(oldName.oldname){
+            case "MENU":
+                menu()
+                break;
+            default :
+            const newName=await prompt([
+                {
+                    type:'input',
+                    name:"newname",
+                    message:'novo Nome:'
+                }
+            ])
+            newName.newname.trim()
+            newName.newname.replaceAll(/[/,!,?,*,+,%,@,`,~,;,:]/g, ' ');
+    
+            const password=await prompt([
+                {
+                    type:'password',
+                    name:"password",
+                    message:'senha do admin:'
+                }
+            ])
+    
+            if(oldName.oldname!=""&& newName.newname!=""&& password.password==process.env.ADMIN_PASSWORD){
+      
+                var recursive=true
+                try {
+                    do {
+                        const result=await collection.findOneAndUpdate({'modelo':oldName.oldname},{$set:{"modelo":newName.newname}})
+                        result?recursive=true:recursive=false
+                    } while (recursive);
+                    setTimeout(()=>{
+                        menu()
+                    },1000)
+                } catch (error) {
+                    clog(colors.red('Erro!!!'))
+                    setTimeout(()=>{
+                        menu()
+                    },2000)
+                }
+            }else{
+                menu()
             }
-        ])
-        newName.newname.trim()
-        newName.newname.replaceAll(/[/,!,?,*,+,%,@,`,~,;,:]/g, ' ');
-
-        const password=await prompt([
-            {
-                type:'password',
-                name:"password",
-                message:'senha do admin:'
-            }
-        ])
-
-        if(oldName.oldname!=""&& newName.newname!=""&& password.password==process.env.ADMIN_PASSWORD){
-  
-            var recursive=true
-            try {
-                do {
-                    const result=await collection.findOneAndUpdate({'modelo':oldName.oldname},{$set:{"modelo":newName.newname}})
-                    result.value?recursive=true:recursive=false
-                } while (recursive);
-                setTimeout(()=>{
-                    menu()
-                },1000)
-            } catch (error) {
-                clog(colors.red('Erro!!!'))
-                setTimeout(()=>{
-                    menu()
-                },2000)
-            }
-        }else{
-            menu()
         }
+
 
     }
     /////////info
@@ -815,6 +894,7 @@ const menu=async()=>{
     }
 
 
+
     ////menu
 
     switch (question.name) {
@@ -842,6 +922,9 @@ const menu=async()=>{
         case "Grupos":
             toGroup()
         break;
+        case "Grupos/Modelos":
+            AlltoGroup()
+        break;
         case "Info":
             clearDisplay()
             info()
@@ -855,5 +938,9 @@ const menu=async()=>{
     }
 }
 
-
 menu()
+
+
+
+  
+ 
