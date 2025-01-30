@@ -17,11 +17,11 @@ let monitor=new Monitor()
 store.set("qtyModel",'uva')
 dotenv.config()
 
-const listarGrupos=["IMAGEM","AUDIO","ENERGIA","COMUNICACAO"]
+const listarGrupos=["IMAGEM","AUDIO","ENERGIA","COMUNICACAO","FERRAMENTAS"]
 const listaUsuarios=["claudio",'eyler',"dourado"]
 
 var client
-client=new MongoClient(`mongodb://${process.env.URI}:27017`)
+client=new MongoClient(`mongodb://${process.env.M_USER}:${process.env.M_PASSWORD}@${process.env.URI}:27017`)
 
 const db=client.db(process.env.DB)
 const collection=db.collection(process.env.COLLECTION)
@@ -41,14 +41,16 @@ const osBar=async()=>{
     var os1 = os.filter((items)=>{return items != "deposito"})
     return os1.sort()
 }
-const allType=async()=>{
-    let tudo=await collection.find().toArray()
+const allType=async(group)=>{
+    let tudo=await collection.find({$or:[{grupo:group},{grupo:null}]}).toArray()
     var modelo=[]
+    
     tudo.forEach((el)=>{
         if(!modelo.includes(el.modelo)){
             modelo.push(el.modelo)
         }
     })
+
     return modelo.sort()
 }
 
@@ -146,17 +148,10 @@ const menu=async()=>{
                 }else{
                     store.set('modelo','')
                     store.set('grupo','')
-                    menu()
+                    cadastrar()
                 }
             }else{
                 clearDisplay()
-
-                var selectModelo=await allType()
-                selectModelo.unshift(new inquirer.Separator())
-                selectModelo.unshift('MENU')
-                selectModelo.unshift("NOVO MODELO")
-
-
 
                 const listaGrupos=await prompt([
                     {
@@ -164,14 +159,24 @@ const menu=async()=>{
                         name:"grupo",
                         choices:listarGrupos,
                         message:"Grupo:"
+                        
                     }
                 ])
+                var selectModelo=await allType(listaGrupos.grupo)
+
+                selectModelo.unshift(new inquirer.Separator())
+                selectModelo.unshift('MENU')
+                selectModelo.unshift("NOVO MODELO")
+
+
+
                 const listaModelos=await prompt([
                     {
                         type:'list',
                         name:"modelo",
                         choices:selectModelo,
-                        message:"Modelo:"
+                        message:"Modelo:",
+                        pageSize:35
                     }
                 ])
 
@@ -793,9 +798,7 @@ const menu=async()=>{
                 }
             )
             try {
-               
                 await collection.findOneAndUpdate({'patrimonio':patrimonio.patrimonio},{$set:{"info":infor.info}})
-                
                 info()
             } catch (error) {
                 clog(`${colors.red(error)}`)

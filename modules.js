@@ -63,7 +63,7 @@ const createArr=(arr)=>{
     arr.forEach((el) => {
       if (el.modelo === ele) {
         Fpatrimonio.push(el.patrimonio);
-        mod.grupo= el.grupo
+        mod.grupo= el.grupo?el.grupo:'...'
 
       }
     });
