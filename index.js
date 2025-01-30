@@ -21,7 +21,7 @@ const listarGrupos=["IMAGEM","AUDIO","ENERGIA","COMUNICACAO"]
 const listaUsuarios=["claudio",'eyler',"dourado"]
 
 var client
-client=new MongoClient(`mongodb://${process.env.M_USER}:${process.env.M_PASSWORD}@${process.env.URI}:27017`)
+client=new MongoClient(`mongodb://${process.env.URI}:27017`)
 
 const db=client.db(process.env.DB)
 const collection=db.collection(process.env.COLLECTION)
@@ -68,18 +68,48 @@ const allGrupos=async()=>{
 }
 
 const menu=async()=>{
+    if(store.get('user')){
+        
+    }else{
+        let user=await prompt([
+            {
+                type:'list',
+                name:"user",
+                choices:listaUsuarios,
+                message:"Usuario:"
+            }
+        ])
+        store.set('user',user.user)
+
+    }
     
 	clearDisplay()
-    clog(await osBar())
-    store.clearAll()
+    store.set('evento','')
+    // store.clearAll()
     const question=await prompt({
         type:'list',
         name:"name",
         message:'MENU',
         pageSize:15,
-        choices:['Procurar','Entrada','Saida','Imprimir',new inquirer.Separator(),"Renomear","Grupos","Grupos/Modelos",'Cadastrar','Info','Deletar',new inquirer.Separator(),'EXIT',new inquirer.Separator()]
+        choices:['Procurar','Entrada','Saida','Imprimir',new inquirer.Separator(),"Renomear","OS_Ativas","Grupos","Grupos/Modelos",'Cadastrar','Info','Deletar',new inquirer.Separator(),'EXIT',new inquirer.Separator()]
     })
+    
+    
+    
+    ///////OS ATIVAS
+    
+    const osAtivas=async()=>{
+        
+        clog(await osBar())
 
+        const sairParaOMenu=await prompt({
+            type:'confirm',
+            name:'sair_menu',
+            message:"Enter para sair!"
+        })
+        sairParaOMenu.sair_menu?menu():menu()
+        
+    }
 
     /////////cadastrar
 
@@ -196,7 +226,7 @@ const menu=async()=>{
             }
         ])
 
-        if(question.patrimonio!="" && password.password==process.env.ADMIN_PASSWORD){
+        if(question.patrimonio.match(/([0-9])\d{5,5}/g) && password.password==process.env.ADMIN_PASSWORD){
 
             try {
                 const result=await collection.deleteOne({'patrimonio':question.patrimonio})
@@ -252,10 +282,7 @@ const menu=async()=>{
 
                 try {
                     clearDisplay()
-                    
-                    
-                    if(question.patrimonio!=""){
-                        
+                    if(question.patrimonio){    
                         const result=await collection.find({$or:[{'patrimonio':{$regex:question.patrimonio}},{'modelo':{ $regex: question.patrimonio}}]}).toArray();
                         
                         var result2=await createArr(result)
@@ -401,9 +428,7 @@ const menu=async()=>{
         }
     }
 
-
     ////////procurar
-
 
     const procurar=async(preOs)=>{
         const question=await prompt([
@@ -444,7 +469,6 @@ const menu=async()=>{
 
     ///////////saida
 
-
     var sair=[]
 
     const saida=async()=>{
@@ -455,7 +479,6 @@ const menu=async()=>{
             monitor.draw(store.get("qtyModel"),result.length)
         }
 
-
         sair.forEach((el)=>{
             if(el.modelo==="Não Cadastrado"){
                 console.log(`Patrimonio:${colors.yellow(el.patrimonio).bold} Modelo:${colors.red(el.modelo).bold}`)
@@ -463,8 +486,8 @@ const menu=async()=>{
                 console.log(`${colors.yellow(el.patrimonio).bold} | ${colors.green(el.modelo).bold}  ${el.info?"| "+colors.cyan(el.info).bold:''}`)
             }
         })
-        store.get('usuarioSaida')!=undefined?clog(store.get('usuarioSaida')):clog('selecione usuario')
-        if(store.get('usuarioSaida')){
+        if(store.get("evento")){
+            
             const patrimonio=await prompt([
                 {
                     type:'input',
@@ -473,11 +496,9 @@ const menu=async()=>{
                 }
             ])
             
-            if(patrimonio.patrimonio!=''){
-                clog(store.get('usuarioSaida'))
-                clog(store.get('dataevento'))
+            if(patrimonio.patrimonio){
                 try {
-                    const saiu=await collection.findOneAndUpdate(patrimonio,{ $set : { "data" : moment().format('DD/MM/YYYY'),'user':store.get('usuarioSaida'),"evento":store.get('evento')} })
+                    const saiu=await collection.findOneAndUpdate(patrimonio,{ $set : { "data" : moment().format('DD/MM/YYYY'),'user':store.get('user'),"evento":store.get('evento')} })
                     if(sair.length ==10) {sair.shift()}
                     store.set("qtyModel",saiu.modelo)
                     if(!checkAvailability(sair,{patrimonio:saiu.patrimonio,modelo:saiu.modelo,info:saiu.info,evento:saiu.evento})) {
@@ -487,29 +508,18 @@ const menu=async()=>{
                     saida()
                 } catch (error) {
                     if(sair.length ==10) {sair.shift()}
-
+    
                     if (!sair.some(obj => JSON.stringify(obj) === JSON.stringify({patrimonio:patrimonio.patrimonio,modelo:"Não Cadastrado"}))) {
                         sair.push({patrimonio:patrimonio.patrimonio,modelo:"Não Cadastrado"})
                     }
                     saida()
                 }
-
+    
             }else{
                 menu()
             }
-            
-            
+
         }else{
-            const user=await prompt([
-                {
-                    type:'list',
-                    name:"user",
-                    choices:listaUsuarios,
-                    message:"Usuario:"
-                }
-            ])
-            
-            
             var selectEvento=await osBar()
             selectEvento.push(new inquirer.Separator())
             selectEvento.push("NOVO EVENTO")
@@ -521,108 +531,34 @@ const menu=async()=>{
                     name:"eventos",
                     choices:selectEvento,
                     message:"Evento:"
-
+    
                 }
             ])
-
-            switch (user.user) {
-                case 'eyler':
-                    store.set('usuarioSaida','eyler')
-                    clearDisplay()
-                    switch (listaEventos.eventos ) {
-                        case "NOVO EVENTO":
-                            const evento=await prompt([
-                                {
-                                    type:'input',
-                                    name:"evento",
-                                    message:'EVENTO:'
-                                }
-                            ])
-                            evento.evento=evento.evento.trim()
-                            evento.evento=evento.evento.replace(/[/,!,?,*,+,%,@,`,~,;,:]/g, '-');
-                            store.set('evento',evento.evento)
-
-                            saida()
-                            break;
-                        case "MENU":
-                                menu()
-                        break;
-                        default:
-                            store.set('evento',listaEventos.eventos)
-                            saida()
-                            break;
-                    }
-
+            switch (listaEventos.eventos ) {
+                case "NOVO EVENTO":
+                    const evento=await prompt([
+                        {
+                            type:'input',
+                            name:"evento",
+                            message:'EVENTO:'
+                        }
+                    ])
+                    evento.evento=evento.evento.trim()
+                    evento.evento=evento.evento.replace(/[/,!,?,*,+,%,@,`,~,;,:]/g, '-');
+                    store.set('evento',evento.evento)
+    
+                    saida()
                     break;
-                case 'claudio':
-                    store.set('usuarioSaida','claudio')
-                    clearDisplay()
-                    switch (listaEventos.eventos ) {
-                        case "NOVO EVENTO":
-                            const evento=await prompt([
-                                {
-                                    type:'input',
-                                    name:"evento",
-                                    message:'EVENTO:'
-                                }
-                            ])
-                            evento.evento=evento.evento.trim()
-                            evento.evento=evento.evento.replace(/[/,!,?,*,+,%,@,`,~,;,:]/g, '-');
-                            store.set('evento',evento.evento)
-
-                            saida()
-                            break;
-                        case "MENU":
-                                menu()
-                        break;
-                        default:
-                            store.set('evento',listaEventos.eventos)
-                            saida()
-                            break;
-                    }
-
-                    break;
-                case 'dourado':
-                    store.set('usuarioSaida','dourado')
-                    clearDisplay()
-                    switch (listaEventos.eventos ) {
-                        case "NOVO EVENTO":
-                            const evento=await prompt([
-                                {
-                                    type:'input',
-                                    name:"evento",
-                                    message:'EVENTO:'
-                                }
-                            ])
-                            evento.evento=evento.evento.trim()
-                            evento.evento=evento.evento.replace(/[/,!,?,*,+,%,@,`,~,;,:]/g, '-');
-                            store.set('evento',evento.evento)
-
-                            saida()
-                            break;
-                        case "MENU":
-                                menu()
-                        break;
-                        default:
-                            store.set('evento',listaEventos.eventos)
-                            saida()
-                            break;
-                    }
-
-                    break;
-                case 'EXIT':
-                    exit(1)
-                break;
-                case 'MENU':
-                    menu()
+                case "MENU":
+                        menu()
                 break;
                 default:
+                    store.set('evento',listaEventos.eventos)
+                    saida()
                     break;
             }
-        }  
+        }
     }
-
-
 
     ////////entrada
 
@@ -636,62 +572,46 @@ const menu=async()=>{
                 clog(`${colors.blue(el.evento?el.evento:"deposito").bold} | ${colors.yellow(el.patrimonio).bold} | ${colors.green(el.modelo).bold} ${el.info?"|" +colors.cyan(el.info).bold:''}`)
             }
         })
-        if(store.get("usuarioentrada")){
 
-            let patrimonioentrada=await prompt([
-                {
-                    type:'input',
-                    name:"patrimonio",
-                    message:'PATRIMONIO:'
-                }
-            ])
-     
-            if(patrimonioentrada.patrimonio){
-                let tester=await collection.findOne({'patrimonio':patrimonioentrada.patrimonio})
-                if(tester){
-                    if(tester.evento=="deposito"){
-                        clog(`${colors.yellow("Não estava em Evento!!")}`)
-                        play('./beep.wav')
-                        setTimeout(()=>{entrada()},500)
-                    }
-                    else{
-                        try {
-            
-                            const retorno=await collection.findOneAndUpdate(patrimonioentrada,{ $set : { "data" : moment().format('DD/MM/YYYY'),'user':store.get("usuarioentrada"),"evento":"deposito",'ultimoevento':tester.evento} })
-                            if(arrRetorno.length == 10){arrRetorno.shift()}
-                            arrRetorno.push({patrimonio:retorno.patrimonio,modelo:retorno.modelo,evento:tester.evento,info:retorno.info})
-                            play('./beep.wav')
-                            entrada()
-                            
-                        } catch (error) {
-                            entrada()
-                        }
-                    }   
-                }else{
-                    clog(`${colors.red("Não Cadastrado")}`)
-                    if(arrRetorno.length == 10){arrRetorno.shift()}
-                    arrRetorno.push({patrimonio:patrimonioentrada.patrimonio,modelo:'NÃO CADASTRADO'})
+        let patrimonioentrada=await prompt([
+            {
+                type:'input',
+                name:"patrimonio",
+                message:'PATRIMONIO:'
+            }
+        ])
+    
+        if(patrimonioentrada.patrimonio){
+            let tester=await collection.findOne({'patrimonio':patrimonioentrada.patrimonio})
+            if(tester){
+                if(tester.evento=="deposito"){
+                    clog(`${colors.yellow("Não estava em Evento!!")}`)
                     play('./beep.wav')
                     setTimeout(()=>{entrada()},500)
                 }
+                else{
+                    try {
+        
+                        const retorno=await collection.findOneAndUpdate(patrimonioentrada,{ $set : { "data" : moment().format('DD/MM/YYYY'),'user':store.get("user"),"evento":"deposito",'ultimoevento':tester.evento} })
+                        if(arrRetorno.length == 10){arrRetorno.shift()}
+                        arrRetorno.push({patrimonio:retorno.patrimonio,modelo:retorno.modelo,evento:tester.evento,info:retorno.info})
+                        play('./beep.wav')
+                        entrada()
+                        
+                    } catch (error) {
+                        entrada()
+                    }
+                }   
             }else{
-                store.set("usuarioentrada","")
-                menu()
+                clog(`${colors.red("Não Cadastrado")}`)
+                if(arrRetorno.length == 10){arrRetorno.shift()}
+                arrRetorno.push({patrimonio:patrimonioentrada.patrimonio,modelo:'NÃO CADASTRADO'})
+                play('./beep.wav')
+                setTimeout(()=>{entrada()},500)
             }
         }else{
-            let usuarioEntrada=await prompt([
-                {
-                    type:'list',
-                    name:"usuarioentrada",
-                    choices:listaUsuarios,
-                    message:"Usuario:"
-                }
-            ])
-            store.set("usuarioentrada",usuarioEntrada.usuarioentrada)
-            entrada()
+            menu()
         }
-
-
     }
 
     //////add to group
@@ -757,7 +677,6 @@ const menu=async()=>{
             }
         ]);
       
-        
         switch(modelo.modelo){
             case "MENU" :
                 menu()
@@ -852,8 +771,6 @@ const menu=async()=>{
                 menu()
             }
         }
-
-
     }
     /////////info
 
@@ -892,9 +809,6 @@ const menu=async()=>{
             },500)
         }
     }
-
-
-
     ////menu
 
     switch (question.name) {
@@ -919,6 +833,9 @@ const menu=async()=>{
         case "Renomear":
             renomear()
         break;
+        case "OS_Ativas":
+            osAtivas()
+        break;
         case "Grupos":
             toGroup()
         break;
@@ -939,8 +856,3 @@ const menu=async()=>{
 }
 
 menu()
-
-
-
-  
- 
