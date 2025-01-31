@@ -525,7 +525,7 @@ const menu=async()=>{
             if(el.modelo==="Não Cadastrado"){
                 console.log(`Patrimonio:${colors.yellow(el.patrimonio).bold} Modelo:${colors.red(el.modelo).bold}`)
             }else{
-                console.log(`${colors.yellow(el.patrimonio).bold} | ${colors.green(el.modelo).bold}  ${el.info?"| "+colors.cyan(el.info).bold:''}`)
+                console.log(`${colors.yellow(el.patrimonio).bold} | ${colors.green(el.modelo).bold}  ${el.info?"| "+colors.red(el.info).bold:''}`)
             }
         })
         if(store.get("evento")){
@@ -611,7 +611,7 @@ const menu=async()=>{
             if(el.modelo=='NÃO CADASTRADO'){
                 clog(`Patrimonio:${colors.green(el.patrimonio).bold} Modelo:${colors.red(el.modelo).bold}`)
             }else{
-                clog(`${colors.blue(el.evento?el.evento:"deposito").bold} | ${colors.yellow(el.patrimonio).bold} | ${colors.green(el.modelo).bold} ${el.info?"|" +colors.cyan(el.info).bold:''}`)
+                clog(`${colors.blue(el.evento?el.evento:"deposito").bold} | ${colors.yellow(el.patrimonio).bold} | ${colors.green(el.modelo).bold} ${el.info?"|" +colors.red(el.info).bold:''}`)
             }
         })
 
