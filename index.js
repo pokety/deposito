@@ -42,16 +42,29 @@ const osBar=async()=>{
     return os1.sort()
 }
 const allType=async(group)=>{
-    let tudo=await collection.find({$or:[{grupo:group},{grupo:null}]}).toArray()
-    var modelo=[]
+    if(group){
+        let tudo=await collection.find({$or:[{grupo:group},{grupo:null}]}).toArray()
+        var modelo=[]
+        
+        tudo.forEach((el)=>{
+            if(!modelo.includes(el.modelo)){
+                modelo.push(el.modelo)
+            }
+        })
     
-    tudo.forEach((el)=>{
-        if(!modelo.includes(el.modelo)){
-            modelo.push(el.modelo)
-        }
-    })
-
-    return modelo.sort()
+        return modelo.sort()
+    }else{
+        let tudo=await collection.find().toArray()
+        var modelo=[]
+        
+        tudo.forEach((el)=>{
+            if(!modelo.includes(el.modelo)){
+                modelo.push(el.modelo)
+            }
+        })
+    
+        return modelo.sort()  
+    }
 }
 
 function checkAvailability(arr, val) {
@@ -93,9 +106,10 @@ const menu=async()=>{
         name:"name",
         message:'MENU',
         pageSize:15,
-        choices:['Procurar','Entrada','Saida','Imprimir',new inquirer.Separator(),"Renomear","OS_Ativas","Grupos","Grupos/Modelos",'Cadastrar','Info','Deletar',new inquirer.Separator(),'EXIT',new inquirer.Separator()]
+        choices:['Procurar','Entrada','Saida','Imprimir',new inquirer.Separator(),"OS_Ativas",'Info',new inquirer.Separator(),'EXIT',new inquirer.Separator()]
     })
-    
+    // choices:['Procurar','Entrada','Saida','Imprimir',new inquirer.Separator(),"Renomear","OS_Ativas","Grupos","Grupos/Modelos",'Cadastrar','Info','Deletar','Geral',new inquirer.Separator(),'EXIT',new inquirer.Separator()]
+
     
     
     ///////OS ATIVAS
@@ -196,14 +210,19 @@ const menu=async()=>{
                             store.set('modelo',question.modelo)
                             cadastrar() 
                         }else{
+                            store.set('modelo',"")
+                            store.set('grupo',"")
                             menu()
                         }
                         break;
                     case "MENU":
+                        store.set('modelo',"")
+                        store.set('grupo',"")
                             menu()
                     break;
                     default:
                         store.set('modelo',listaModelos.modelo)
+                        store.set('grupo',listaGrupos.grupo)
                         cadastrar() 
                         break;
                 }
@@ -231,7 +250,7 @@ const menu=async()=>{
             }
         ])
 
-        if(question.patrimonio.match(/([0-9])\d{5,5}/g) && password.password==process.env.ADMIN_PASSWORD){
+        if(question.patrimonio && password.password==process.env.ADMIN_PASSWORD){
 
             try {
                 const result=await collection.deleteOne({'patrimonio':question.patrimonio})
@@ -256,6 +275,23 @@ const menu=async()=>{
             menu()
         }
     }
+    ///////// geraozao
+
+    const geral=async()=>{
+        clearDisplay()
+        const result=await collection.find().toArray();            
+        var result2= createArr(result)
+  
+        var txtPrint=''
+
+        result2.forEach((el)=>{
+            clog(`${colors.green(el.qty).bold}${'\u2008'.repeat(4 - el.qty.length)}| ${el.grupo?colors.cyan(el.grupo).bold :"..."}${el.grupo?'\u2008'.repeat(12 - el.grupo.length):'\u2008'.repeat(9)}| ${colors.yellow(el.modelo).bold}${'\u2008'.repeat(45 - el.modelo.length)}| ${colors.red(el.patrimonio).bold}`)
+            txtPrint+=`${el.qty}${'\u2008'.repeat(4 - el.qty.length)}| ${el.grupo?el.grupo:"..."}${el.grupo?'\u2008'.repeat(12 - el.grupo.length):'\u2008'.repeat(9)}| ${el.modelo}${'\u2008'.repeat(45 - el.modelo.length)}| ${el.patrimonio}\n`
+        })
+        
+        fs.writeFileSync(`./PDF/geral.txt`,txtPrint,{ encoding: "utf8"}) 
+    }
+    
 
     //////////imprimir
 
@@ -271,7 +307,8 @@ const menu=async()=>{
                 type:'list',
                 name:"eventos",
                 choices:selectEventoIprimir,
-                message:"Evento:"
+                message:"Evento:",
+                pageSize:35
             }
         ])
 
@@ -665,12 +702,21 @@ const menu=async()=>{
       //////add all to group
 
       const AlltoGroup=async()=>{
-        clearDisplay()
-        const selectModelo=await allType()
-        selectModelo.unshift(new inquirer.Separator())
-        selectModelo.unshift('MENU')
-        selectModelo.unshift(new inquirer.Separator())
+          clearDisplay()
+          const grupoAdd=await prompt([
+              {
+                  type:'list',
+                  name:"grupo",
+                  choices:listarGrupos,
+                  message:"Grupo:"
+              }
+          ])
 
+          const selectModelo=await allType(grupoAdd.grupo)
+          selectModelo.unshift(new inquirer.Separator())
+          selectModelo.unshift('MENU')
+          selectModelo.unshift(new inquirer.Separator())
+          
         
         const modelo=await prompt([
             {
@@ -678,7 +724,7 @@ const menu=async()=>{
                 name:"modelo",
                 choices:selectModelo,      
                 message:"selecione o modelo:",
-                pageSize:40
+                pageSize:35
             }
         ]);
       
@@ -687,14 +733,6 @@ const menu=async()=>{
                 menu()
                 break;
             default:
-                const grupoAdd=await prompt([
-                    {
-                        type:'list',
-                        name:"grupo",
-                        choices:listarGrupos,
-                        message:"Grupo:"
-                    }
-                ])
         
                 if(grupoAdd.grupo && modelo.modelo){
         
@@ -718,6 +756,7 @@ const menu=async()=>{
     //////renomear
 
     const renomear=async()=>{
+
         var selectModelo=await allType()
         selectModelo.unshift(new inquirer.Separator())
         selectModelo.unshift('MENU')
@@ -729,7 +768,8 @@ const menu=async()=>{
                 type:'list',
                 name:"oldname",
                 choices:selectModelo,
-                message:"Modelo:"
+                message:"Modelo:",
+                pageSize:35
             }
         ])
         switch(oldName.oldname){
@@ -849,6 +889,9 @@ const menu=async()=>{
             clearDisplay()
             info()
             break;
+        case "Geral":
+            geral()
+        break;
         case 'EXIT':
             clearDisplay()
             exit(1)
