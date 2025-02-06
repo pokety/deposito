@@ -14,14 +14,14 @@ import os from "os"
 import {clearDisplay,clog,createArr,play} from './modules.js'
 import Monitor from "./monitor.js";
 let monitor=new Monitor()
-store.set("qtyModel",'uva')
+store.set("qtyModel",'')
 dotenv.config()
 
 const listarGrupos=["IMAGEM","AUDIO","ENERGIA","COMUNICACAO","FERRAMENTAS"]
 const listaUsuarios=["claudio",'eyler',"dourado"]
 
 var client
-client=new MongoClient(`mongodb://${process.env.M_USER}:${process.env.M_PASSWORD}@${process.env.URI}:27017`)
+client=new MongoClient(`mongodb://${process.env.URI}:27017`)
 
 const db=client.db(process.env.DB)
 const collection=db.collection(process.env.COLLECTION)
@@ -81,8 +81,31 @@ const allGrupos=async()=>{
     })
     return grupos.sort()
 }
+async function options(role){
+    try {
+        const response=await fetch("https://api.npoint.io/2ae8bac63e209816b284")//4
+    
+        var result=await response.json()
+    
+        switch (role) {
+            case "admin":
+                result=result.admin.map((el)=>el=="Separator"?new inquirer.Separator():el)
+                break;
+            default:
+                    result=result.default.map((el)=>el=="Separator"?new inquirer.Separator():el)
+                break;
+        }  
+        return result
 
+    } catch (error) {
+        return ['Procurar','Entrada','Saida','Imprimir',new inquirer.Separator(),"OS_Ativas",'Info',new inquirer.Separator(),'EXIT',new inquirer.Separator()]
+        
+    }
+}
+
+const option=await options(process.env.ROLE)
 const menu=async()=>{
+    clearDisplay()
     if(store.get('user')){
         
     }else{
@@ -98,7 +121,6 @@ const menu=async()=>{
 
     }
     
-	clearDisplay()
     store.set('evento','')
     // store.clearAll()
     const question=await prompt({
@@ -106,8 +128,9 @@ const menu=async()=>{
         name:"name",
         message:'MENU',
         pageSize:15,
-        choices:['Procurar','Entrada','Saida','Imprimir',new inquirer.Separator(),"OS_Ativas",'Info',new inquirer.Separator(),'EXIT',new inquirer.Separator()]
+        choices:option
     })
+    // ['Procurar','Entrada','Saida','Imprimir',new inquirer.Separator(),"OS_Ativas",'Info',new inquirer.Separator(),'EXIT',new inquirer.Separator()]
     // choices:['Procurar','Entrada','Saida','Imprimir',new inquirer.Separator(),"Renomear","OS_Ativas","Grupos","Grupos/Modelos",'Cadastrar','Info','Deletar','Geral',new inquirer.Separator(),'EXIT',new inquirer.Separator()]
 
     
@@ -154,9 +177,12 @@ const menu=async()=>{
                     try {
                         await collection.insertOne(newCad)
                         clog(`Patrimonio:${colors.green(newCad.patrimonio).bold}  Cadastrado`)
+                        play('./beep.wav')
+
                         cadastrar()
                     } catch (error) {
                         clog(colors.red('Patrimonio já cadastrado !!!'))
+                        play('./jaestacadastrado.wav')
                         cadastrar()
                     }
                 }else{
@@ -473,6 +499,8 @@ const menu=async()=>{
     ////////procurar
 
     const procurar=async(preOs)=>{
+
+
         const question=await prompt([
             {
                 type:'input',
@@ -487,16 +515,18 @@ const menu=async()=>{
                 const result=await collection.find({$or:[{'patrimonio':question.patrimonio},{'evento':question.patrimonio},{'modelo':{ $regex: question.patrimonio}},{'grupo':{ $regex: question.patrimonio}}]}).toArray();
 
                 if(result.length >0){
+                    play('./beep.wav')
                     
                     result.forEach(el => {
                         clog(`${colors.blue(el.patrimonio).bold} / ${el.grupo?colors.cyan(el.grupo).bold:"..."} / ${colors.yellow(el.modelo).bold}`)
                         clog(colors.cyan('        --------------'))
-                        clog(`${colors.green(el.data).bold} ${colors.red(el.user).bold} Evento:${colors.green(el.evento).bold}`)
+                        clog(`${colors.green(el.data).bold} ${colors.cyan(el.user).bold} Evento:${colors.green(el.evento).bold}`)
                         if(el.ultimoevento){clog(`Ultimo Evento:${colors.green(el.ultimoevento).bold} `)}
-                        if(el.info){clog(colors.cyan(el.info).bold)}
+                        if(el.info){clog(colors.red(el.info).bold)}
                         clog(colors.yellow('----------------------------------------------------------------'))
                     })
                 }else{
+                    play('./naocadastrado.wav')
                     clog(colors.red('------------------Não cadastrado------------------'))
                 }
                 procurar()
@@ -546,13 +576,15 @@ const menu=async()=>{
                     if(!checkAvailability(sair,{patrimonio:saiu.patrimonio,modelo:saiu.modelo,info:saiu.info,evento:saiu.evento})) {
                         sair.push({patrimonio:saiu.patrimonio,modelo:saiu.modelo,info:saiu.info,evento:saiu.evento}); // Adiciona o objeto ao array
                         play("./beep.wav")
+
                     }
                     saida()
                 } catch (error) {
                     if(sair.length ==10) {sair.shift()}
-    
+                    
                     if (!sair.some(obj => JSON.stringify(obj) === JSON.stringify({patrimonio:patrimonio.patrimonio,modelo:"Não Cadastrado"}))) {
                         sair.push({patrimonio:patrimonio.patrimonio,modelo:"Não Cadastrado"})
+                        play("./naocadastrado.wav")
                     }
                     saida()
                 }
@@ -628,7 +660,6 @@ const menu=async()=>{
             if(tester){
                 if(tester.evento=="deposito"){
                     clog(`${colors.yellow("Não estava em Evento!!")}`)
-                    play('./beep.wav')
                     setTimeout(()=>{entrada()},500)
                 }
                 else{
@@ -648,7 +679,7 @@ const menu=async()=>{
                 clog(`${colors.red("Não Cadastrado")}`)
                 if(arrRetorno.length == 10){arrRetorno.shift()}
                 arrRetorno.push({patrimonio:patrimonioentrada.patrimonio,modelo:'NÃO CADASTRADO'})
-                play('./beep.wav')
+                play('./naocadastrado.wav')
                 setTimeout(()=>{entrada()},500)
             }
         }else{
@@ -829,12 +860,17 @@ const menu=async()=>{
         )
 
         if(patrimonio.patrimonio.trim().match(/([0-9])\d{5,5}/g)){
+
+            let infoPreview=await collection.findOne({patrimonio:patrimonio.patrimonio.trim()})
+            // console.log(infoPreview)
             
             let infor=await prompt(
                 {
                     type:'input',
                     name:"info",
-                    message:"info:"
+                    message:"info:",
+                    default:infoPreview.info,
+
                 }
             )
             try {

@@ -2,22 +2,9 @@
 
 import {exec} from 'node:child_process'
 import os from 'os'
-import * as mm from 'music-metadata'
-
-async function getMusicDuration(filePath) {
-  try {
-    const metadata = await mm.parseFile(filePath);
-    const duration = metadata.format.duration; 
-
-    return duration
-  } catch (error) {
-    console.error(`Erro ao obter a duração do arquivo: ${error.message}`);
-  }
-}
-
 
 async function play(file){
-  let duracao=Math.floor(await getMusicDuration(file))
+  let duracao=1
 
   switch (os.type()) {
     case 'win32':
@@ -32,9 +19,6 @@ async function play(file){
       break;
   }
 }
-
-
-
 
 function clearDisplay(){
   process.stdout.write('\x1Bc')
@@ -76,6 +60,5 @@ const createArr=(arr)=>{
   
   return newsObj;
 };
-
 
   export {clearDisplay,clog,createArr,play}

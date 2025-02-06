@@ -1,4 +1,0 @@
-2  | AUDIO       | FZ 108 passiva                          | 019672 - 012141
-1  | AUDIO       | CABECOTE YAMAHA EMX212S                 | 012115
-2  | AUDIO       | NL4                                     | 001393 - 012893
-5  | ENERGIA     | EXTENSAO 1 MT                           | 012498 - 012632 - 012595 - 012856 - 016656
