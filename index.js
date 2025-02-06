@@ -91,6 +91,9 @@ async function options(role){
             case "admin":
                 result=result.admin.map((el)=>el=="Separator"?new inquirer.Separator():el)
                 break;
+            case "viewer":
+                result=result.viewer.map((el)=>el=="Separator"?new inquirer.Separator():el)
+                break;
             default:
                     result=result.default.map((el)=>el=="Separator"?new inquirer.Separator():el)
                 break;
@@ -106,7 +109,7 @@ async function options(role){
 const option=await options(process.env.ROLE)
 const menu=async()=>{
     clearDisplay()
-    if(store.get('user')){
+    if(store.get('user') || process.env.ROLE=="viewer"){
         
     }else{
         let user=await prompt([
