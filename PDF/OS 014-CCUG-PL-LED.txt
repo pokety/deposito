@@ -1,0 +1,7 @@
+2  | ENERGIA     | EXTENSAO 1 MT                           | 016924 - 021399
+3  | ENERGIA     | EXTENSAO 5 MT                           | 012479 - 012633 - 012466
+3  | ENERGIA     | EXTENSAO 10 A 20 MTS                    | 012459 - 012574 - 012358
+10 | IMAGEM      | HDMI curto                              | 001863 - 012231 - 012159 - 001805 - 012650 - 012670 - 012658 - 012227 - 001862 - 001834
+1  | IMAGEM      | CONTROLE TV samsung                     | 019822
+1  | IMAGEM      | FONTE DISTRIBUIDOR HDMI fx-hsp0104d     | 012726
+1  | IMAGEM      | NEO ID ESTUDIO 6 PLUS                   | 019982

@@ -21,7 +21,7 @@ const listarGrupos=["IMAGEM","AUDIO","ENERGIA","COMUNICACAO","FERRAMENTAS"]
 const listaUsuarios=["claudio",'eyler',"dourado"]
 
 var client
-client=new MongoClient(`mongodb://${process.env.URI}:27017`)
+client=new MongoClient(`mongodb://${process.env.M_USER}:${process.env.M_PASSWORD}@${process.env.URI}:27017`)
 
 const db=client.db(process.env.DB)
 const collection=db.collection(process.env.COLLECTION)
@@ -83,7 +83,7 @@ const allGrupos=async()=>{
 }
 async function options(role){
     try {
-        const response=await fetch("https://api.npoint.io/2ae8bac63e209816b284")//4
+        const response = await fetch("https://api.npoint.io/2ae8bac63e209816b284")//4
     
         var result=await response.json()
     
@@ -101,7 +101,7 @@ async function options(role){
         return result
 
     } catch (error) {
-        return ['Procurar','Entrada','Saida','Imprimir',new inquirer.Separator(),"OS_Ativas",'Info',new inquirer.Separator(),'EXIT',new inquirer.Separator()]
+        return ['Procurar','Previas','Entrada','Saida','Imprimir',new inquirer.Separator(),"OS_Ativas",'Info',new inquirer.Separator(),'EXIT',new inquirer.Separator()]
         
     }
 }
@@ -151,6 +151,45 @@ const menu=async()=>{
         })
         sairParaOMenu.sair_menu?menu():menu()
         
+    }
+
+    //////
+    const previa=async()=>{
+
+
+        const question=await prompt([
+            {
+                type:'input',
+                name:"patrimonio",
+                message:'--------------------evento--------------------\n'
+            }
+        ])
+        try {
+            clearDisplay()
+            if(question.patrimonio!=""){
+                const result=await collection.find({$or:[{'ultimoevento':{ $regex: question.patrimonio}}]}).toArray();
+
+                if(result.length >0){  
+                    result.forEach(el => {
+                        clog(`${colors.blue(el.patrimonio).bold} / ${el.grupo?colors.cyan(el.grupo).bold:"..."} / ${colors.yellow(el.modelo).bold}`)
+                        clog(colors.cyan('        --------------'))
+                        clog(`${colors.green(el.data).bold} ${colors.cyan(el.user).bold} Evento:${colors.green(el.evento).bold}`)
+                        if(el.ultimoevento){clog(`Ultimo Evento:${colors.green(el.ultimoevento).bold} `)}
+                        if(el.info){clog(colors.red(el.info).bold)}
+                        clog(colors.yellow('----------------------------------------------------------------'))
+                    })
+                }else{
+                    clog(colors.red('------------------Não Encontrado------------------'))
+                }
+                previa()
+            }else{
+                menu()
+            }
+            
+        } catch (error) {
+            menu()
+        }
+
     }
 
     /////////cadastrar
@@ -548,11 +587,6 @@ const menu=async()=>{
 
     const saida=async()=>{
         clearDisplay()
-        if( store.get('evento')){
-            let result=await collection.find({$and:[{"evento":store.get('evento')},{"modelo":store.get("qtyModel")}]}).toArray()
-
-            monitor.draw(store.get("qtyModel"),result.length)
-        }
 
         sair.forEach((el)=>{
             if(el.modelo==="Não Cadastrado"){
@@ -562,7 +596,11 @@ const menu=async()=>{
             }
         })
         if(store.get("evento")){
-            
+            let result1=await collection.find({$and:[{"evento":store.get('evento')},{"modelo":store.get("qtyModel")}]}).toArray()
+
+            monitor.draw(store.get("qtyModel"),result1.length)
+
+            clog(`EVENTO:${colors.green(store.get("evento")).bold}`)
             const patrimonio=await prompt([
                 {
                     type:'input',
@@ -593,6 +631,8 @@ const menu=async()=>{
                 }
     
             }else{
+                store.set("evento","")
+                store.set("qtyModel","")
                 menu()
             }
 
@@ -607,8 +647,8 @@ const menu=async()=>{
                     type:'list',
                     name:"eventos",
                     choices:selectEvento,
-                    message:"Evento:"
-    
+                    message:"Evento:",
+                    pageSize:30
                 }
             ])
             switch (listaEventos.eventos ) {
@@ -896,6 +936,9 @@ const menu=async()=>{
     switch (question.name) {
         case "Procurar":
             procurar()
+            break;
+        case "Previas":
+            previa()
             break;
         case "Cadastrar":
             cadastrar()

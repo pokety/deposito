@@ -1,0 +1,4 @@
+1  | AUDIO       | PLACA USB UCA202                        | 012288
+1  | AUDIO       | MESA MG12XU 12CH                        | 015232
+2  | AUDIO       | QSC K8 1kw105                           | 012315 - 012316
+1  | AUDIO       | A-C SINAL                               | 013009

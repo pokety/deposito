@@ -1,0 +1,4 @@
+POST https://api.npoint.io/2ae8bac63e209816b284 HTTP/1.1
+content-type: application/json
+
+{"admin":["Procurar","Previas","Entrada","Saida","Imprimir","Separator","Renomear","OS_Ativas","Grupos","Grupos/Modelos","Cadastrar","Info","Deletar","Geral","Separator","EXIT"],"viewer":["Procurar","Imprimir","Info","Separator","EXIT"],"default":["Procurar","Previas","Entrada","Saida","Imprimir","Separator","OS_Ativas","Info","Separator","EXIT"]}
