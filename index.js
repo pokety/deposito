@@ -11,7 +11,7 @@ import PDFDocument from "pdfkit-table"
 import fs from 'fs-extra'
 import open from 'open'
 import os from "os"
-import {clearDisplay,clog,createArr,play} from './modules.js'
+import {clearDisplay,clog,createArr,play,notify} from './modules.js'
 import Monitor from "./monitor.js";
 let monitor=new Monitor()
 store.set("qtyModel",'')
@@ -101,7 +101,7 @@ async function options(role){
         return result
 
     } catch (error) {
-        return ['Procurar','Previas','Entrada','Saida','Imprimir',new inquirer.Separator(),"OS_Ativas",'Info',new inquirer.Separator(),'EXIT',new inquirer.Separator()]
+        return ['Cadastrar','Procurar','Previas','Entrada','Saida','Imprimir',new inquirer.Separator(),"OS_Ativas",'Info',new inquirer.Separator(),'EXIT',new inquirer.Separator()]
         
     }
 }
@@ -463,7 +463,7 @@ const menu=async()=>{
         
             default:
                     try {
-                        clearDisplay()
+                        //clearDisplay()
                         
                         if(listaEventos.eventos){
                             const result=await collection.find({$or:[{'evento':listaEventos.eventos}]}).toArray();            
@@ -478,8 +478,8 @@ const menu=async()=>{
                             var txtPrint=''
 
                             result2.forEach((el)=>{
-                                clog(`${colors.green(el.qty).bold}${'\u2008'.repeat(3 - el.qty.length)}| ${el.grupo?colors.cyan(el.grupo).bold :"..."}${el.grupo?'\u2008'.repeat(12 - el.grupo.length):'\u2008'.repeat(9)}| ${colors.yellow(el.modelo).bold}${'\u2008'.repeat(40 - el.modelo.length)}| ${colors.red(el.patrimonio).bold}`)
-                                txtPrint+=`${el.qty}${'\u2008'.repeat(3 - el.qty.length)}| ${el.grupo?el.grupo:"..."}${el.grupo?'\u2008'.repeat(12 - el.grupo.length):'\u2008'.repeat(9)}| ${el.modelo}${'\u2008'.repeat(40 - el.modelo.length)}| ${el.patrimonio}\n`
+                                clog(`${colors.green(el.qty).bold}${'\u2008'.repeat(7 - el.qty.length)}| ${el.grupo?colors.cyan(el.grupo).bold :"..."}${el.grupo?'\u2008'.repeat(16 - el.grupo.length):'\u2008'.repeat(13)}| ${colors.yellow(el.modelo).bold}${'\u2008'.repeat(50 - el.modelo.length)}| ${colors.red(el.patrimonio).bold}`)
+                                txtPrint+=`${el.qty}${'\u2008'.repeat(7 - el.qty.length)}| ${el.grupo?el.grupo:"..."}${el.grupo?'\u2008'.repeat(12 - el.grupo.length):'\u2008'.repeat(9)}| ${el.modelo}${'\u2008'.repeat(50 - el.modelo.length)}| ${el.patrimonio}\n`
                             })
                             
                             fs.writeFileSync(`./PDF/${listaEventos.eventos}.txt`,txtPrint,{ encoding: "utf8"}) 
@@ -526,13 +526,13 @@ const menu=async()=>{
                             }else{
                                 clog(colors.red('------------------------- OS não exite -------------------------'))
                             }
-                            menu()
+                           // menu()
                         }else{
-                            menu()
+                            //menu()
                         }   
                     } catch (error) {
-                        // console.log(error)
-                        menu()
+                         console.log(error)
+                        //menu()
                     }
                 break;
         }
@@ -585,9 +585,9 @@ const menu=async()=>{
 
     var sair=[]
 
-    const saida=async()=>{
+    const saida=async()=>{ 
         clearDisplay()
-
+        
         sair.forEach((el)=>{
             if(el.modelo==="Não Cadastrado"){
                 console.log(`Patrimonio:${colors.yellow(el.patrimonio).bold} Modelo:${colors.red(el.modelo).bold}`)
@@ -597,7 +597,8 @@ const menu=async()=>{
         })
         if(store.get("evento")){
             let result1=await collection.find({$and:[{"evento":store.get('evento')},{"modelo":store.get("qtyModel")}]}).toArray()
-
+            notify(JSON.stringify({actual:{qty:result1.length,modelo:store.get("qtyModel")},data:sair}))
+            
             monitor.draw(store.get("qtyModel"),result1.length)
 
             clog(`EVENTO:${colors.green(store.get("evento")).bold}`)
@@ -682,6 +683,7 @@ const menu=async()=>{
     var arrRetorno=[]
     const entrada=async()=>{
         clearDisplay()
+        notify(JSON.stringify({actual:{qty:'*',modelo:'*'},data:arrRetorno}))
         arrRetorno.forEach((el)=>{
             if(el.modelo=='NÃO CADASTRADO'){
                 clog(`Patrimonio:${colors.green(el.patrimonio).bold} Modelo:${colors.red(el.modelo).bold}`)

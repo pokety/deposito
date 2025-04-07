@@ -1,4 +1,7 @@
+2  | AUDIO       | FZ 108 passiva                          | 019672 - 012141
+1  | AUDIO       | PLACA USB UCA202                        | 019949
+1  | AUDIO       | CABECOTE YAMAHA EMX212S                 | 012115
+2  | ENERGIA     | EXTENSAO 10 A 20 MTS                    | 012402 - 012377
 1  | IMAGEM      | HDMI 40mts                              | 001476
-1  | IMAGEM      | HDMI medio                              | 012686
 1  | IMAGEM      | PROJETOR EPSON 4.5K eb_l260f            | 012136
 1  | IMAGEM      | CONTROLE PROJETOR epson                 | 012140

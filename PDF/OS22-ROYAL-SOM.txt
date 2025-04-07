@@ -1,0 +1,12 @@
+4  | AUDIO       | FZ 108 ativa                            | 010572 - 015296 - 010573 - 010568
+1  | AUDIO       | DIRECT BOX IMP2                         | 019770
+1  | AUDIO       | MICROFONE SENNHEISER EW100 G3 BASE      | 018806
+1  | AUDIO       | MICROFONE SENNHEISER EW100 G3 BASTAO    | 018814
+1  | AUDIO       | MESA 01v96i                             | 012579
+7  | AUDIO       | POWERCOM SINAL                          | 012929 - 012932 - 012898 - 012924 - 012984 - 012917 - 012940
+4  | AUDIO       | PRX ONE SUB                             | 012075 - 019891 - 019885 - 012190
+4  | AUDIO       | PRX ONE ALTA A                          | 012051 - 012076 - 012156 - 019681
+4  | AUDIO       | PRX ONE ALTA B                          | 012052 - 012073 - 012180 - 019684
+7  | AUDIO       | A-C SINAL                               | 013015 - 001951 - 001568 - 013000 - 012956 - 014567 - 013124
+1  | ENERGIA     | AUTOTRANSFORMADOR 500VA                 | 012881
+3  | ENERGIA     | EXTENSAO 10 A 20 MTS                    | 016551 - 012439 - 012390

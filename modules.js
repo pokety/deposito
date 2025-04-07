@@ -61,4 +61,11 @@ const createArr=(arr)=>{
   return newsObj;
 };
 
-  export {clearDisplay,clog,createArr,play}
+async function notify(msg){
+  fetch('http://10.1.1.8:81/deposito_acap', {
+    method: 'POST', // PUT works too
+    body: msg
+  })
+}
+
+  export {clearDisplay,clog,createArr,play,notify}

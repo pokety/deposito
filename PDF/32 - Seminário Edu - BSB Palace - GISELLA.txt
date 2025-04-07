@@ -1,0 +1,28 @@
+5      | AUDIO       | PRX ONE SUB                                       | 014830 - 012075 - 019874 - 012039 - 019891
+5      | AUDIO       | PRX ONE ALTA A                                    | 012045 - 012051 - 012041 - 014829 - 012076
+5      | AUDIO       | PRX ONE ALTA B                                    | 012046 - 012052 - 012040 - 014828 - 012073
+3      | AUDIO       | PLACA USB UCA202                                  | 019798 - 012050 - 019527
+2      | AUDIO       | MICROFONE GOOSENECK SENNHEISER MAT133-S B         | 012741 - 018677
+4      | AUDIO       | POWERCOM SINAL                                    | 012905 - 012900 - 012908 - 012955
+12     | AUDIO       | A-C SINAL                                         | 001869 - 012958 - 012953 - 012952 - 013009 - 013004 - 001868 - 013024 - 013026 - 013025 - 013031 - 014571
+4      | AUDIO       | XLR                                               | 001298 - 001299 - 000860 - 000168
+1      | COMUNICACAO | FONTE CUE LIGHT                                   | 017072
+1      | COMUNICACAO | PASSADOR CUE LIGHT LASER                          | 018269
+3      | COMUNICACAO | RADIO HT DTR620                                   | 018421 - 018412 - 012818
+3      | COMUNICACAO | BASE HT DTR620                                    | 017873 - 017870 - 017872
+1      | ENERGIA     | FONTE livepro                                     | 019753
+3      | ENERGIA     | FONTE HT DTR620                                   | 018439 - 018437 - 012820
+4      | ENERGIA     | EXTENSAO 1 MT                                     | 021288 - 012617 - 012551 - 013152
+9      | ENERGIA     | EXTENSAO 10 A 20 MTS                              | 012365 - 012533 - 012543 - 012357 - 012623 - 012538 - 012451 - 012570 - 012855
+3      | IMAGEM      | TV 55 philco ph55a                                | 018323 - 018332 - 018326
+2      | IMAGEM      | TV 55 lg 55uq80                                   | 019988 - 019550
+5      | IMAGEM      | HDMI curto                                        | 001889 - 000735 - 012222 - 001878 - 013100
+1      | IMAGEM      | CONTROLE TV philco                                | 018495
+1      | IMAGEM      | CONTROLE TV LG                                    | 012085
+2      | IMAGEM      | HDMI 40mts                                        | 001425 - 001474
+1      | IMAGEM      | HDMI 20mts                                        | 001431
+3      | IMAGEM      | DISTRIBUIDOR HDMI 4K fx-hsp0104d                  | 019832 - 019844 - 019831
+3      | IMAGEM      | FONTE DISTRIBUIDOR HDMI fx-hsp0104d               | 012780 - 012788 - 012784
+1      | IMAGEM      | CUE LIGHT RECEPTOR                                | 017953
+1      | IMAGEM      | LIVEPRO L1                                        | 019713
+2      | IMAGEM      | CAPTURA HDMI X USB                                | 019287 - 019283
